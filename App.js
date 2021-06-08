@@ -4,7 +4,6 @@ import React, { useRef, useEffect, useState } from 'react';
 import {
   Animated,
   Dimensions,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   Easing,
@@ -17,126 +16,43 @@ import {
   Pressable
 } from 'react-native';
 import axios from 'axios'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; 
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons' 
+import { createAppContainer } from 'react-navigation';
+import { createBottomTabNavigator } from 'react-navigation-tabs'
+
+const requestUserPermission = async () => {
+  const authStatus = await messaging().requestPermission();
+  const enabled =
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  if (enabled) {
+    getFcmToken() //<---- Add this
+    console.log('Authorization status:', authStatus);
+  }
+}
+
+const getFcmToken = async () => {
+  const fcmToken = await messaging().getToken();
+  if (fcmToken) {
+    console.log(fcmToken);
+  } else {
+    console.log("Failed", "No token received");
+  }
+}
+
+messaging().setBackgroundMessageHandler(
+  async remoteMessage => {
+    Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+  }
+);
 
 let ScreenHeight = Dimensions.get("window").height;
 let ScreenWidth = Dimensions.get("window").width;
 
-const styles = StyleSheet.create({
-  mainPage: {
-    backgroundColor: 'white'
-  },
-  loadingStyle: {
-    backgroundColor: '#e64d00',
-    height: ScreenHeight,
-    width: ScreenWidth,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'absolute',
-    top: 0,
-    left: 0
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  title: {
-    color: 'white',
-    fontSize: 48,
-    fontFamily: 'bodang-xingkai',
-    lineHeight: 56
-  },
-  tinyLogo: {
-    width: 96,
-    height: 96,
-  },
-  copyright: {
-    bottom: 10,
-    position: 'absolute',
-    color: '#ff9966',
-    fontFamily: 'Poppins-Light'
-  },
-  mainView: {
-    height: ScreenHeight,
-    width: ScreenWidth,
-    backgroundColor: '#f6f5f7',
-    alignItems: 'center',
-    zIndex: -1
-  },
-  navLogo: {
-    width: 128,
-    height: 128,
-    marginBottom: 40
-  },
-  menuBtn: {
-    width: 28,
-    height: 28,
-    marginTop: 5
-  },
-  loginView: {
-    justifyContent: 'center',
-    width: ScreenWidth-150,
-    height: '100%',
-    alignItems: 'center',
-    marginTop: -30
-  },
-  loginViewKeyboard: {
-    justifyContent: 'flex-start',
-    marginTop: 30
-  },
-  loginHeader: {
-    fontSize: 36,
-    fontFamily: 'Poppins-Medium',
-    paddingBottom: 10,
-  },
-  loginInput: {
-    width: '100%',
-    paddingLeft: 10,
-    paddingRight: 10,
-    color: 'black',
-    borderBottomWidth: 1.5,
-    borderColor: '#aaaaaa',
-    fontFamily: 'Poppins-Regular',
-    paddingBottom: 5,
-    fontSize: 16,
-    marginTop: 20,
-  },
-  loginBtn: {
-    width: '100%',
-    backgroundColor: '#e64d00',
-    padding: 10,
-    borderRadius: 30,
-  },
-  loginBtnText: {
-    color: 'white',
-    fontFamily: 'Poppins-Medium',
-    textAlign: 'center',
-    marginTop: 2,
-  },
-  fpBtn: {
-    marginTop: 40,
-    marginBottom: 10
-  },
-  fpBtnText: {
-    color: '#141414',
-    fontFamily: 'Poppins-Medium'
-  },
-  homepageView: {
-    width: ScreenWidth-150,
-    justifyContent: 'center',
-    height: ScreenHeight
-  },
-  errorText: {
-    backgroundColor: '#e64d00',
-    position: 'absolute',
-    bottom: 25,
-    width: ScreenWidth-50,
-    padding: 10,
-    color: 'white',
-    textAlign: 'center',
-    fontFamily: 'Poppins-Light',
-    borderRadius: 10
-  }
-});
+const raw_styles = require('./styles.json')
+
+const styles = StyleSheet.create(JSON.parse(JSON.stringify(raw_styles).replace(/"ScreenWidth"/gm, ScreenWidth).replace(/"ScreenHeight"/gm, ScreenHeight)));
 
 const FadeInView = (props) => {
   const fadeAnim = useRef(new Animated.Value(0)).current
@@ -198,14 +114,6 @@ const LoadingView = (props) => {
       }}>
       {props.children}
     </Animated.View>
-  )
-}
-
-const MainView = (props) => {
-  return (
-    <View style={styles.mainView}>
-      {props.children}
-    </View>
   )
 }
 
@@ -271,7 +179,7 @@ const LoginView = (props) => {
     const fetchToken = async () => {
       const token = await axios({
         method: 'POST',
-        url: 'http://60.51.103.27:9595/api/v1/auth/login',
+        url: 'http://60.53.166.67:9595/api/v1/auth/login',
         data: {
           username: username, 
           password: password
@@ -305,38 +213,113 @@ const LoginView = (props) => {
   )
 }
 
-const HomepageView = (props) => {
-  const token = props.token
+const HomepageView = (token, setToken, setMessage) => {
+
+  return (
+    <View style={styles.homepageView}>
+      <View style={styles.homepageContentContainer}>
+        <View style={styles.avatarWrapper}>
+          <Image style={styles.avatar} source={{
+            uri: 'https://wallpapers-hd-wide.com/wp-content/uploads/2015/11/cat_im_hungry-photo-wallpaper-1920x1200.jpg',
+          }}/>
+        </View>
+        <Text style={styles.usernameText}>Melvin Chia</Text>
+        <Text style={styles.roleText}>student</Text>
+        <View style={styles.homepageInnerContentContainer}>
+          <Text style={styles.homepageSectionHeader}>Today's Lesson</Text>
+          <View style={styles.homepageSectionHeaderSeperator}></View>
+          <Text style={styles.homepageSectionContent}>Mathematics</Text>
+          <Text style={styles.homepageSectionContentSub}>11.00a.m. - 12.00a.m.</Text>
+        </View>
+        <View style={styles.homepageInnerContentContainer}>
+          <View style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between'
+          }}>
+            <Text style={styles.homepageSectionHeader}>Today's Comment</Text>
+            <Text style={{fontFamily: 'Poppins-Medium'}}>View</Text>
+          </View>
+          <View style={{...styles.homepageSectionHeaderSeperator, height: 3}}></View>
+          <Text style={styles.homepageComment}>This is the comment for today. This is the comment from your teacher. The comment can be as long as you want. You can add ...</Text>
+          <Text style={styles.homepageCommentAuthor}>- Teacher's Name</Text>
+        </View>
+      </View>
+    </View>
+  )
+}
+
+const WorkView = () => {
+  return (
+    <View style={
+      styles.settingsView
+    }><Text style={{
+      fontFamily: 'Poppins-Medium',
+      fontSize: 24
+    }}>Work</Text></View>
+  )
+}
+
+const CommentView = () => {
+  return (
+    <View style={
+      styles.settingsView
+    }><Text style={{
+      fontFamily: 'Poppins-Medium',
+      fontSize: 24
+    }}>Comment</Text></View>
+  )
+}
+
+const PaymentView = () => {
+  return (
+    <View style={
+      styles.settingsView
+    }><Text style={{
+      fontFamily: 'Poppins-Medium',
+      fontSize: 24
+    }}>Payment</Text></View>
+  )
+}
+
+const SettingsView = (token, setToken, setMessage) => {
+
   const signOut = () => {
     const _signOut = async () => {
       const result = await axios({
         method: 'POST',
-        url: 'http://60.51.103.27:9595/api/v1/auth/logout',
+        url: 'http://60.53.166.67:9595/api/v1/auth/logout',
         headers: {
           Authorization: 'Token '+token
         }
       }).catch(err => console.log(err))
       if (result) {
         await AsyncStorage.removeItem('@auth_token')
-        props.setToken(null)
-        props.setMessage('Logout successfully')
+        setToken(null)
+        setMessage('Logout successfully')
       }
     }
     _signOut()
   }
 
   return (
-    <View style={styles.homepageView}>
+    <View style={
+      styles.settingsView
+    }>
+      <Text style={{
+        fontFamily: 'Poppins-Medium',
+        fontSize: 24
+      }}>Settings</Text>
       <Pressable style={{
         borderRadius: 60,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        marginTop: 20,
       }} onPress={signOut}>
         <Text style={{
           backgroundColor: '#e64d00',
           textAlign: 'center',
           color: 'white', 
-          fontSize: 20,
-          width: '100%',
+          fontSize: 16,
+          width: 300,
           paddingVertical: 5,
           paddingTop: 7,
           fontFamily: 'Poppins-Medium'
@@ -346,31 +329,50 @@ const HomepageView = (props) => {
   )
 }
 
-const requestUserPermission = async () => {
-    const authStatus = await messaging().requestPermission();
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-    if (enabled) {
-      getFcmToken() //<---- Add this
-      console.log('Authorization status:', authStatus);
-    }
-  }
+const Topbar = () => {
+  return (
+    <View style={styles.topbar}>
+      <Icon style={{color: 'white'}} name="menu" size={36} onPress={()=>{Alert.alert("Facebook Button Clicked")}}></Icon>
+      <MaterialIcons style={{color: 'white'}} name="notifications-none" size={30} onPress={()=>{Alert.alert("Facebook Button Clicked")}}></MaterialIcons>
+    </View>
+  )
+}
 
-const getFcmToken = async () => {
-    const fcmToken = await messaging().getToken();
-    if (fcmToken) {
-     console.log(fcmToken);
-    } else {
-     console.log("Failed", "No token received");
-    }
-  }
+const TabNav = [
+  ['Home', HomepageView, 'home-outline'],
+  ['Work', WorkView, 'notebook-outline'],
+  ['Comment', CommentView, 'comment-multiple-outline'],
+  ['Payment', PaymentView, 'credit-card-outline'],
+  ['Settings', SettingsView, 'account-outline'],
+]
 
-messaging().setBackgroundMessageHandler(
-  async remoteMessage => {
-    Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+const bottomTabNavigator = (token, setToken, setMessage) => createBottomTabNavigator(
+  Object.fromEntries(TabNav.map(([label, component, icon]) => [label, {
+    screen: ()=>component(token, setToken, setMessage),
+    navigationOptions: {
+      tabBarIcon: ({ tintColor }) => (
+        <Icon name={icon} size={26} color={tintColor} />
+      )
+    }
+  }])),
+  {
+    initialRouteName: 'Home',
+    tabBarOptions: {
+      activeTintColor: '#e64d00',
+      showLabel: false,
+      style: {
+        elevation: 8,
+        borderTopWidth: 0,
+        height: 60
+      }
+    }
   }
 );
+
+const AppContainer = (token, setToken, setMessage) => {
+  const Container = createAppContainer(bottomTabNavigator(token, setToken, setMessage))
+  return <><Container/></>
+};
 
 const App = () => {
   const [loaded, setLoaded] = useState(false)
@@ -394,14 +396,15 @@ const App = () => {
    })
 
   return (
-    <SafeAreaView style={styles.mainPage}>
+    <>
       <StatusBar backgroundColor='#e64d00' />
-      <MainView>
-        {token==null?
-        <LoginView setToken={setToken} setMessage={setMessage}/> :
-        <HomepageView token={token} setToken={setToken} setMessage={setMessage}/>}
-        {message!==null?<MessageText setMessage={setMessage}>{message}</MessageText>:null}
-      </MainView>
+      {token==null?
+      <LoginView setToken={setToken} setMessage={setMessage}/> :
+      (<>
+        <Topbar/>
+        {AppContainer(token, setToken, setMessage)}
+      </>)}
+      {message!==null?<MessageText setMessage={setMessage}>{message}</MessageText>:null}
       {!loaded ? <LoadingView style={styles.loadingStyle}>
         <FadeInView style={{alignItems: 'center'}} changeLoaded={setLoaded}>
           <Image source={require('./assets/image/yuan.png')} style={styles.tinyLogo}/>
@@ -409,7 +412,7 @@ const App = () => {
         </FadeInView>
         <Text style={styles.copyright}>Copyright &copy; 2021 All rights reserved.</Text>
       </LoadingView> : null}
-    </SafeAreaView>
+    </>
   );
 };
 

@@ -83,6 +83,8 @@ project.ext.react = [
 
 apply from: "../../node_modules/react-native/react.gradle"
 
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"  
+
 apply plugin: "com.google.gms.google-services"
 
 /**
@@ -202,6 +204,8 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:28.1.0')
     
     implementation 'com.google.firebase:firebase-messaging:21.1.0'
+
+    implementation project(':react-native-vector-icons')  
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'
