@@ -134,7 +134,7 @@
 		"color": "#666666",
 		"fontFamily": "Poppins-Medium",
 		"fontSize": 12,
-		"marginTop": -8
+		"marginTop": -4
 	},
 	"homepageComment": {
 		"marginTop": 10,
@@ -233,5 +233,73 @@
 		"color": "white",
 		"fontSize": 20,
 		"marginTop": 8
+	},
+	"commentView": {
+		"backgroundColor": "white",
+		"height": "100%",
+		"padding": 20
+	},
+	"monthContainer": {
+		"width": "100%",
+		"flexDirection": "row",
+		"justifyContent": "space-between",
+		"alignItems": "center",
+		"marginBottom": 10
+	},
+	"monthText": {
+		"color": "black",
+		"fontFamily": "Poppins-Medium",
+		"fontSize": 28,
+		"marginTop": 8
+	},
+	"calendar": {
+		"marginVertical": 20
+	},
+	"weekdayContainer": {
+		"width": "100%",
+		"flexDirection": "row",
+		"justifyContent": "space-between",
+		"marginBottom": 20
+	},
+	"weekday": {
+		"fontFamily": "Poppins-SemiBold",
+		"color": "#141414",
+		"width": 40,
+		"textAlign": "center"
+	},
+	"dayRow": {
+		"flexDirection": "row",
+		"justifyContent": "space-between",
+		"marginVertical": 10,
+		"alignItems": "center"
+	},
+	"day": {
+		"width": 40,
+		"textAlign": "center",
+		"color": "#141414",
+		"fontFamily": "Poppins-Medium",
+		"fontSize": 12
+	},
+	"todayContainer": {
+		"backgroundColor": "#e64d00",
+		"height": 35,
+		"width": 35,
+		"justifyContent": "center",
+		"alignItems": "center",
+		"borderRadius": 40
+ 	},
+	"today": {
+		"color": "white",
+		"marginTop": 2
+	},
+	"viewCommentBtn": {
+		"fontFamily": "Poppins-Medium",
+		"padding": 40,
+		"paddingVertical": 3,
+		"paddingTop": 6,
+		"backgroundColor": "#e64d00",
+		"color": "white",
+		"borderRadius": 30,
+		"elevation": 2
 	}
 }

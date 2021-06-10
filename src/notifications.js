@@ -1,4 +1,5 @@
 import messaging from '@react-native-firebase/messaging'
+import { Alert } from 'react-native'
 
 const requestUserPermission = async () => {
 	const authStatus = await messaging().requestPermission();

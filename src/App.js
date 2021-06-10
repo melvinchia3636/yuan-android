@@ -1,10 +1,9 @@
-import React, { createRef, useRef, useEffect, useState, useLayoutEffect } from 'react';
+import React, { createRef, useRef, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Animated,
   Dimensions,
   StatusBar,
-  StyleSheet,
   Easing,
   View,
   Alert,
@@ -16,24 +15,17 @@ import {
 } from 'react-native';
 import axios from 'axios'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; 
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons' 
-import Ionicons from 'react-native-vector-icons/Ionicons'
 
 import { createAppContainer } from 'react-navigation';
 import { createBottomTabNavigator } from 'react-navigation-tabs'
-import { createStackNavigator } from '@react-navigation/stack';
-import { NavigationContainer } from '@react-navigation/native';
 
 import messaging from '@react-native-firebase/messaging'
 import * as notifications from './notifications.js'
 import DialogBox from 'react-native-dialogbox'
 
-let ScreenHeight = Dimensions.get("window").height;
-let ScreenWidth = Dimensions.get("window").width;
-
-const raw_styles = require('./styles.json')
-
-const styles = StyleSheet.create(JSON.parse(JSON.stringify(raw_styles).replace(/"ScreenWidth"/gm, ScreenWidth).replace(/"ScreenHeight"/gm, ScreenHeight)));
+import styles from './styles'
+import CommentView from './Comment'
+import Topbar from './Topbar'
 
 const FadeInView = (props) => {
   const fadeAnim = useRef(new Animated.Value(0)).current
@@ -50,7 +42,7 @@ const FadeInView = (props) => {
     ).start(() => {
       setTimeout(() => {
         Animated.timing(slideUp, {
-          toValue: -ScreenHeight,
+          toValue: - Dimensions.get("window").height,
           easing: Easing.back(),
           duration: 1000,
           useNativeDriver: true
@@ -274,69 +266,6 @@ const WorkView = () => {
   </>)
 }
 
-const CommentStack = createStackNavigator();
-
-function CommentView() {
-  const [title, setTitle] = useState('Comment')
-  return (
-    <>
-    <Topbar title={title}/>
-    <NavigationContainer>
-      <CommentStack.Navigator headerMode='none'>
-        <CommentStack.Screen name="Comment">
-          {props => <InnerCommentView {...props} setTitle={setTitle}/>}
-        </CommentStack.Screen>
-        <CommentStack.Screen name="Chat">
-          {props => <ChatRoomListView {...props} setTitle={setTitle}/>}
-        </CommentStack.Screen>
-      </CommentStack.Navigator>
-    </NavigationContainer>
-  </>);
-}
-
-const ChatRoomListView = (props) => {
-  React.useEffect(() => {
-    props.setTitle('Chat')
-    const unsubscribe = props.navigation.addListener('transitionStart', (e) => {
-      if (e.data.closing) props.setTitle('Comment')
-    });
-  
-    return unsubscribe;
-  }, [props.navigation]);
-
-  return (<>
-    <View>
-      <Text style={{
-        fontFamily: 'Poppins-Medium',
-        fontSize: 24
-      }}>Chat room hell yeah</Text>
-    </View>
-  </>)
-}
-
-const InnerCommentView = (props) => {
-  React.useEffect(() => {
-    const unsubscribe = props.navigation.addListener('transitionStart', (e) => {
-      console.log('erhewths')
-    });
-  
-    return unsubscribe;
-  }, [props.navigation]);
-  return (<>
-    <View style={
-      styles.settingsView
-    }>
-      <Text style={{
-        fontFamily: 'Poppins-Medium',
-        fontSize: 24
-      }}>Comment</Text>
-      <Pressable style={styles.chatButton} onPress={()=>props.navigation.navigate('Chat')}>
-        <Ionicons name='chatbox-outline' style={{color: 'white'}} size={27}></Ionicons>
-      </Pressable>
-    </View>
-  </>)
-}
-
 const PaymentView = () => {
   return (<>
   <Topbar title="Payment"/>
@@ -396,16 +325,6 @@ const SettingsView = (token, setToken) => {
   </>)
 }
 
-const Topbar = ({ title }) => {
-  return (
-    <View style={styles.topbar}>
-      <Icon style={{color: 'white'}} name="menu" size={36} onPress={()=>{Alert.alert("Facebook Button Clicked")}}></Icon>
-      <Text style={styles.topbarTitle}>{title}</Text>
-      <MaterialIcons style={{color: 'white'}} name="notifications-none" size={30} onPress={()=>{Alert.alert("Facebook Button Clicked")}}></MaterialIcons>
-    </View>
-  )
-}
-
 const TabNav = [
   ['Home', HomepageView, 'home-outline'],
   ['Work', WorkView, 'notebook-outline'],
@@ -444,12 +363,23 @@ const AppContainer = (token, setToken) => {
 
 const App = () => {
   const [token, setToken] = useState(null)
+  const [needLoad, setNeedLoad] = useState(false)
 
   useEffect(() => {
     notifications.requestUserPermission();
     const unsubscribe = messaging().onMessage(async remoteMessage => {
-      Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+      Alert.alert(remoteMessage.notification.title, remoteMessage.notification.body);
     });
+
+    // Check whether an initial notification is available
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (!remoteMessage) {
+          setNeedLoad(true);
+        }
+      });
+      
     return unsubscribe;
    }, []);
 
@@ -473,13 +403,13 @@ const App = () => {
       (<>
         {AppContainer(token, setToken)}
       </>)}
-      <LoadingView style={styles.loadingStyle}>
+      {needLoad ? <LoadingView style={styles.loadingStyle}>
         <FadeInView style={{alignItems: 'center'}}>
           <Image source={require('./assets/image/yuan.png')} style={styles.tinyLogo}/>
           <Text style={styles.title}> 缘学苑 </Text>  
         </FadeInView>
         <Text style={styles.copyright}>Copyright &copy; 2021 All rights reserved.</Text>
-      </LoadingView>
+      </LoadingView> : null}
     </View>
   );
 };
