@@ -253,7 +253,7 @@
 		"marginTop": 8
 	},
 	"calendar": {
-		"marginVertical": 20
+		"marginVertical": 5
 	},
 	"weekdayContainer": {
 		"width": "100%",
