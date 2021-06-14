@@ -59,6 +59,7 @@ const ChatRoomListView = props => {
 };
 
 const InnerCommentView = props => {
+  const [month, setMonth] = useState(new Date().getMonth() + 1);
   React.useEffect(() => {
     const unsubscribe = props.navigation.addListener('transitionStart', e => {
       console.log('erhewths');
@@ -71,22 +72,30 @@ const InnerCommentView = props => {
     <>
       <View style={styles.commentView}>
         <View style={styles.monthContainer}>
-          <Ionicons name="chevron-back" style={{color: '#141414'}} size={27} />
+          <Pressable style={{padding: 15}} onPress={() => setMonth(month - 1)}>
+            <Ionicons
+              name="chevron-back"
+              style={{color: '#141414'}}
+              size={27}
+            />
+          </Pressable>
           {(() => {
-            const date = new Date();
-            const month = date.toLocaleString('default', {month: 'long'});
+            const date = new Date(new Date().getFullYear(), month, 0);
+            const month_text = date.toLocaleString('default', {month: 'long'});
             const year = date.getFullYear();
             return (
               <Text style={styles.monthText}>
-                {month} {year}
+                {month_text} {year}
               </Text>
             );
           })()}
-          <Ionicons
-            name="chevron-forward"
-            style={{color: '#141414'}}
-            size={27}
-          />
+          <Pressable style={{padding: 15}} onPress={() => setMonth(month + 1)}>
+            <Ionicons
+              name="chevron-forward"
+              style={{color: '#141414'}}
+              size={27}
+            />
+          </Pressable>
         </View>
         <View style={styles.calendar}>
           <View style={styles.weekdayContainer}>
@@ -110,16 +119,11 @@ const InnerCommentView = props => {
                   this.slice(chunk_size).chunk(chunk_size),
                 );
               };
-              //<View style={styles.todayContainer}><Text style={{...styles.day, ...styles.today}}>9</Text></View>
               let date_list = [];
-              const date = new Date(
-                new Date().getFullYear(),
-                new Date().getMonth(),
-                1,
-              );
+              const date = new Date(new Date().getFullYear(), month, 1);
               const day_in_month = new Date(
                 new Date().getFullYear(),
-                new Date().getMonth(),
+                month,
                 0,
               ).getDate();
               const diff = date.getDay();
@@ -150,14 +154,26 @@ const InnerCommentView = props => {
                   {date_list.map(r => (
                     <View style={styles.dayRow} key={Math.random()}>
                       {r.map(d => (
-                        <Text
-                          style={{
-                            ...styles.day,
-                            color: d.includes('p') ? '#999999' : '#141414',
-                          }}
-                          key={Math.random()}>
-                          {d.replace('p', '')}
-                        </Text>
+                        <View
+                          style={
+                            parseInt(d, 10) === new Date().getDate() &&
+                            month === new Date().getMonth() + 1
+                              ? styles.todayContainer
+                              : {}
+                          }>
+                          <Text
+                            style={{
+                              ...styles.day,
+                              color: d.includes('p') ? '#999999' : '#141414',
+                              ...(parseInt(d, 10) === new Date().getDate() &&
+                              month === new Date().getMonth() + 1
+                                ? {...styles.day, ...styles.today}
+                                : {}),
+                            }}
+                            key={Math.random()}>
+                            {d.replace('p', '')}
+                          </Text>
+                        </View>
                       ))}
                     </View>
                   ))}
