@@ -5,14 +5,28 @@ import {NavigationContainer} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {Text, View, Pressable} from 'react-native';
 import styles from './styles';
+import axios from 'axios';
 
 import Topbar from './Topbar';
 require('intl'); // import intl object
 require('intl/locale-data/jsonp/en-IN'); // load the required locale details
 
+const getComments = async (date, token) => {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const comments = await axios({
+    url: `http://147.158.196.71:9595/api/v1/comments/fetch-comments/auto/${year}/${month}`,
+    method: 'GET',
+    headers: {
+      Authorization: 'Token ' + token,
+    },
+  }).catch(err => console.log(err));
+  return JSON.parse(comments.data);
+};
+
 const CommentStack = createStackNavigator();
 
-function CommentView() {
+function CommentView(token) {
   const [title, setTitle] = useState('Comment');
   return (
     <>
@@ -20,7 +34,9 @@ function CommentView() {
       <NavigationContainer>
         <CommentStack.Navigator headerMode="none">
           <CommentStack.Screen name="Comment">
-            {props => <InnerCommentView {...props} setTitle={setTitle} />}
+            {props => (
+              <InnerCommentView {...props} setTitle={setTitle} token={token} />
+            )}
           </CommentStack.Screen>
           <CommentStack.Screen name="Chat">
             {props => <ChatRoomListView {...props} setTitle={setTitle} />}
@@ -60,6 +76,14 @@ const ChatRoomListView = props => {
 
 const InnerCommentView = props => {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
+  const [choosenDate, setChoosenDate] = useState(new Date());
+  React.useEffect(() => {
+    getComments(new Date(new Date().getFullYear(), month, 1), props.token).then(
+      r => setComments(r),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [month, props.token]);
+  const [comments, setComments] = useState(null);
   React.useEffect(() => {
     const unsubscribe = props.navigation.addListener('transitionStart', e => {
       console.log('erhewths');
@@ -120,7 +144,11 @@ const InnerCommentView = props => {
                 );
               };
               let date_list = [];
-              const date = new Date(new Date().getFullYear(), month, 1);
+              const date = new Date(new Date().getFullYear(), month - 1, 1);
+
+              const gotComment = (comments || []).map(e =>
+                new Date(e.date).getDate(),
+              );
               const day_in_month = new Date(
                 new Date().getFullYear(),
                 month,
@@ -154,26 +182,55 @@ const InnerCommentView = props => {
                   {date_list.map(r => (
                     <View style={styles.dayRow} key={Math.random()}>
                       {r.map(d => (
-                        <View
+                        <Pressable
                           style={
-                            parseInt(d, 10) === new Date().getDate() &&
-                            month === new Date().getMonth() + 1
+                            parseInt(d, 10) === choosenDate.getDate() &&
+                            month === choosenDate.getMonth() + 1 &&
+                            !d.includes('p')
                               ? styles.todayContainer
                               : {}
-                          }>
+                          }
+                          key={Math.random()}
+                          onPress={e => {
+                            const element =
+                              e._dispatchInstances.memoizedProps.children[0][0]
+                                .props;
+                            if (element.style.color === '#141414') {
+                              setChoosenDate(
+                                new Date(
+                                  new Date().getFullYear(),
+                                  month - 1,
+                                  parseInt(element.children, 10),
+                                ),
+                              );
+                            }
+                          }}>
                           <Text
                             style={{
                               ...styles.day,
                               color: d.includes('p') ? '#999999' : '#141414',
-                              ...(parseInt(d, 10) === new Date().getDate() &&
-                              month === new Date().getMonth() + 1
+                              ...(parseInt(d, 10) === choosenDate.getDate() &&
+                              month === choosenDate.getMonth() + 1 &&
+                              !d.includes('p')
                                 ? {...styles.day, ...styles.today}
                                 : {}),
                             }}
                             key={Math.random()}>
                             {d.replace('p', '')}
                           </Text>
-                        </View>
+                          {gotComment.includes(parseInt(d, 10)) &&
+                          !d.includes('p') ? (
+                            <Text
+                              style={{
+                                textAlign: 'center',
+                                marginTop: -18,
+                                marginBottom: -10,
+                                fontSize: 20,
+                              }}>
+                              ·
+                            </Text>
+                          ) : null}
+                        </Pressable>
                       ))}
                     </View>
                   ))}
@@ -199,12 +256,20 @@ const InnerCommentView = props => {
           <Text style={styles.viewCommentBtn}>View</Text>
         </View>
         <View style={{...styles.homepageSectionHeaderSeperator, height: 3}} />
-        <Text style={styles.homepageComment}>
-          This is the comment for today. This is the comment from your teacher.
-          The comment can be as long as you want. You can add ...
+        <Text style={styles.homepageComment} numberOfLines={1}>
+          {comments
+            ? comments.filter(
+                e => new Date(e.date).getDate() === choosenDate.getDate(),
+              )[0]?.content
+            : ''}
         </Text>
         <Text style={{...styles.homepageCommentAuthor, textAlign: 'left'}}>
-          - Teacher's Name
+          -{' '}
+          {comments
+            ? comments.filter(
+                e => new Date(e.date).getDate() === choosenDate.getDate(),
+              )[0]?.author_name
+            : ''}
         </Text>
         <Pressable
           style={styles.chatButton}

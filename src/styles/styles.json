@@ -301,5 +301,8 @@
 		"color": "white",
 		"borderRadius": 30,
 		"elevation": 2
+	},
+	"gotComment": {
+		"color": "#ff0000"
 	}
 }
