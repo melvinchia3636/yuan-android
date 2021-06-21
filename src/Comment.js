@@ -6,6 +6,10 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {Text, View, Pressable} from 'react-native';
 import styles from './styles';
 import axios from 'axios';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 
 import Topbar from './Topbar';
 require('intl'); // import intl object
@@ -183,13 +187,14 @@ const InnerCommentView = props => {
                     <View style={styles.dayRow} key={Math.random()}>
                       {r.map(d => (
                         <Pressable
-                          style={
-                            parseInt(d, 10) === choosenDate.getDate() &&
+                          style={{
+                            ...(parseInt(d, 10) === choosenDate.getDate() &&
                             month === choosenDate.getMonth() + 1 &&
                             !d.includes('p')
                               ? styles.todayContainer
-                              : {}
-                          }
+                              : {}),
+                            height: wp(9),
+                          }}
                           key={Math.random()}
                           onPress={e => {
                             const element =
@@ -222,10 +227,20 @@ const InnerCommentView = props => {
                           !d.includes('p') ? (
                             <Text
                               style={{
-                                textAlign: 'center',
-                                marginTop: -18,
-                                marginBottom: -10,
-                                fontSize: 20,
+                                ...{
+                                  textAlign: 'center',
+                                  marginTop: -20,
+                                  fontSize: 20,
+                                  borderRadius: 100,
+                                  fontFamily: 'Poppins-Regular',
+                                },
+                                ...(parseInt(d, 10) === choosenDate.getDate() &&
+                                month === choosenDate.getMonth() + 1 &&
+                                !d.includes('p')
+                                  ? {
+                                      color: 'white',
+                                    }
+                                  : {}),
                               }}>
                               ·
                             </Text>
@@ -272,7 +287,7 @@ const InnerCommentView = props => {
             : ''}
         </Text>
         <Pressable
-          style={styles.chatButton}
+          style={{...styles.chatButton, top: hp(80) - 60}}
           onPress={() => props.navigation.navigate('Chat')}>
           <Ionicons name="chatbox-outline" style={{color: 'white'}} size={27} />
         </Pressable>

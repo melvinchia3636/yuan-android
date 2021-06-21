@@ -6,6 +6,7 @@ import {
   Dimensions,
   StatusBar,
   Easing,
+  ScrollView,
   View,
   Alert,
   Image,
@@ -224,7 +225,7 @@ const HomepageView = (token, setToken) => {
           <Text style={styles.usernameText}>{data ? data.name : ''}</Text>
           <Text style={styles.roleText}>{data ? data.role : ''}</Text>
           {data && data.role === 'student' ? (
-            <>
+            <ScrollView style={{marginBottom: 100}}>
               <View style={styles.homepageInnerContentContainer}>
                 <Text style={styles.homepageSectionHeader}>Today's Lesson</Text>
                 <View style={styles.homepageSectionHeaderSeperator} />
@@ -247,7 +248,6 @@ const HomepageView = (token, setToken) => {
                 <View
                   style={{
                     ...styles.homepageSectionHeaderSeperator,
-                    height: 3,
                   }}
                 />
                 <Text style={styles.homepageComment}>
@@ -259,7 +259,7 @@ const HomepageView = (token, setToken) => {
                   - Teacher's Name
                 </Text>
               </View>
-            </>
+            </ScrollView>
           ) : null}
         </View>
       </View>

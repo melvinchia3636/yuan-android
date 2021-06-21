@@ -4,8 +4,8 @@
 	},
 	"loadingStyle": {
 		"backgroundColor": "#e64d00",
-		"height": "ScreenHeight",
-		"width": "ScreenWidth",
+		"height": 100,
+		"width": 100,
 		"alignItems": "center",
 		"justifyContent": "center",
 		"position": "absolute",
@@ -18,19 +18,20 @@
 	},
 	"title": {
 		"color": "white",
-		"fontSize": 48,
+		"fontSize": 12,
 		"fontFamily": "bodang-xingkai",
 		"lineHeight": 56
 	},
 	"tinyLogo": {
-		"width": 96,
-		"height": 96
+		"width": 20,
+		"height": "sameAsWidth"
 	},
 	"copyright": {
 		"bottom": 10,
 		"position": "absolute",
 		"color": "#ff9966",
-		"fontFamily": "Poppins-Light"
+		"fontFamily": "Poppins-Light",
+		"fontSize": 3.5
 	},
 	"navLogo": {
 		"width": 128,
@@ -44,8 +45,8 @@
 	},
 	"loginView": {
 		"justifyContent": "center",
-		"height": "100%",
-		"width": "ScreenWidth",
+		"height": 100,
+		"width": 100,
 		"backgroundColor": "white",
 		"alignItems": "center",
 		"paddingHorizontal": 60
@@ -60,7 +61,7 @@
 		"paddingBottom": 10
 	},
 	"loginInput": {
-		"width": "100%",
+		"width": 100,
 		"paddingLeft": 10,
 		"paddingRight": 10,
 		"color": "black",
@@ -72,7 +73,7 @@
 		"marginTop": 20
 	},
 	"loginBtn": {
-		"width": "100%",
+		"width": 100,
 		"backgroundColor": "#e64d00",
 		"padding": 10,
 		"borderRadius": 30
@@ -92,14 +93,14 @@
 		"fontFamily": "Poppins-Medium"
 	},
 	"homepageView": {
-		"width": "ScreenWidth",
+		"width": 100,
 		"justifyContent": "center",
-		"height": "ScreenHeight",
+		"height": 100,
 		"backgroundColor": "#e64d00"
 	},
 	"homepageContentContainer": {
-		"width": "ScreenWidth",
-		"height": 719.7142857142857,
+		"width": 100,
+		"height": 85,
 		"position": "absolute",
 		"bottom": 0,
 		"left": 0,
@@ -109,7 +110,7 @@
 		"alignItems": "center"
 	},
 	"homepageInnerContentContainer": {
-		"width": "100%",
+		"width": 100,
 		"paddingHorizontal": 30,
 		"marginTop": 30,
 		"marginBottom": 30
@@ -117,24 +118,25 @@
 	"homepageSectionHeader": {
 		"color": "#666666",
 		"fontFamily": "Poppins-Medium",
-		"fontSize": 18
+		"fontSize": 5
 	},
 	"homepageSectionHeaderSeperator": {
 		"backgroundColor": "#e64d00",
-		"width": 25,
-		"height": 2.5,
+		"width": 10,
+		"height": 0.4,
 		"marginBottom": 10
 	},
 	"homepageSectionContent": {
 		"color": "#141414",
 		"fontFamily": "Poppins-Medium",
-		"fontSize": 26
+		"fontSize": 8
 	},
 	"homepageSectionContentSub": {
 		"color": "#666666",
 		"fontFamily": "Poppins-Medium",
-		"fontSize": 12,
-		"marginTop": -4
+		"fontSize": 4,
+		"marginTop": -6,
+		"marginBottom": -20
 	},
 	"homepageComment": {
 		"marginTop": 10,
@@ -159,8 +161,8 @@
 		"borderRadius": 10
 	},
 	"topbar": {
-		"height": 80,
-		"width": "ScreenWidth",
+		"height": 10,
+		"width": 100,
 		"backgroundColor": "#e64d00",
 		"alignItems": "center",
 		"justifyContent": "space-between",
@@ -174,8 +176,8 @@
 		"left": 0
 	},
 	"navbar": {
-		"height": 80,
-		"width": "ScreenWidth",
+		"height": 10,
+		"width": 100,
 		"backgroundColor": "#fcfcfc",
 		"elevation": 10,
 		"alignItems": "center",
@@ -185,62 +187,60 @@
 	},
 	"avatarWrapper": {
 		"elevation": 10,
-		"width": 160,
-		"height": 160,
+		"width": 35,
+		"height": "sameAsWidth",
 		"transform": [
 		{
-			"translateY": -80
+			"translateY": -60
 		}
 		],
 		"borderRadius": 160
 	},
 	"avatar": {
-		"width": 160,
-		"height": 160,
+		"width": 35,
+		"height": "sameAsWidth",
 		"borderRadius": 160
 	},
 	"usernameText": {
 		"color": "#141414",
-		"fontSize": 32,
+		"fontSize": 8,
 		"fontFamily": "Poppins-Medium",
-		"marginTop": -60
+		"marginTop": -40
 	},
 	"roleText": {
-		"fontSize": 16,
+		"fontSize": 4,
 		"fontFamily": "Poppins-Medium",
-		"marginTop": -5
+		"marginTop": -10
 	},
 	"settingsView": {
 		"backgroundColor": "white",
-		"height": "100%",
+		"height": 100,
 		"justifyContent": "center",
 		"alignItems": "center"
 	},
 	"chatButton": {
 		"backgroundColor": "#e64d00",
-		"width": 64,
-		"height": 64,
+		"width": 16,
+		"height": "sameAsWidth",
 		"alignItems": "center",
 		"justifyContent": "center",
 		"borderRadius": 64,
 		"elevation": 4,
 		"position": "absolute",
-		"bottom": 20,
-		"right": 20
+		"right": 10
 	},
 	"topbarTitle": {
 		"fontFamily": "Poppins-Medium",
 		"color": "white",
-		"fontSize": 20,
+		"fontSize": 6,
 		"marginTop": 8
 	},
 	"commentView": {
 		"backgroundColor": "white",
-		"height": "100%",
+		"height": 100,
 		"padding": 20
 	},
 	"monthContainer": {
-		"width": "100%",
 		"flexDirection": "row",
 		"justifyContent": "space-between",
 		"alignItems": "center",
@@ -249,14 +249,13 @@
 	"monthText": {
 		"color": "black",
 		"fontFamily": "Poppins-Medium",
-		"fontSize": 28,
+		"fontSize": 7,
 		"marginTop": 8
 	},
 	"calendar": {
 		"marginVertical": 5
 	},
 	"weekdayContainer": {
-		"width": "100%",
 		"flexDirection": "row",
 		"justifyContent": "space-between",
 		"marginBottom": 20
@@ -264,8 +263,9 @@
 	"weekday": {
 		"fontFamily": "Poppins-SemiBold",
 		"color": "#141414",
-		"width": 40,
-		"textAlign": "center"
+		"width": 10,
+		"textAlign": "center",
+		"fontSize": 3
 	},
 	"dayRow": {
 		"flexDirection": "row",
@@ -274,16 +274,16 @@
 		"alignItems": "center"
 	},
 	"day": {
-		"width": 40,
+		"width": 10,
 		"textAlign": "center",
 		"color": "#141414",
 		"fontFamily": "Poppins-Medium",
-		"fontSize": 12
+		"fontSize": 3.5
 	},
 	"todayContainer": {
 		"backgroundColor": "#e64d00",
-		"height": 35,
-		"width": 35,
+		"height": "sameAsWidth",
+		"width": 9,
 		"justifyContent": "center",
 		"alignItems": "center",
 		"borderRadius": 40

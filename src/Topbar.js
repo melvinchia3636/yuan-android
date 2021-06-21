@@ -3,6 +3,11 @@ import React from 'react';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {View, Text, Alert} from 'react-native';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
+
 import styles from './styles';
 
 const Topbar = ({title}) => {
@@ -11,7 +16,7 @@ const Topbar = ({title}) => {
       <Icon
         style={{color: 'white'}}
         name="menu"
-        size={36}
+        size={wp(9)}
         onPress={() => {
           Alert.alert('Facebook Button Clicked');
         }}
@@ -20,7 +25,7 @@ const Topbar = ({title}) => {
       <MaterialIcons
         style={{color: 'white'}}
         name="notifications-none"
-        size={30}
+        size={wp(9)}
         onPress={() => {
           Alert.alert('Facebook Button Clicked');
         }}
