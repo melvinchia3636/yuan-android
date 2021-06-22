@@ -34,8 +34,8 @@
 		"fontSize": 3.5
 	},
 	"navLogo": {
-		"width": 128,
-		"height": 128,
+		"width": 30,
+		"height": "sameAsWidth",
 		"marginBottom": 40
 	},
 	"menuBtn": {
@@ -56,12 +56,12 @@
 		"paddingTop": 30
 	},
 	"loginHeader": {
-		"fontSize": 36,
+		"fontSize": 10,
 		"fontFamily": "Poppins-Medium",
 		"paddingBottom": 10
 	},
 	"loginInput": {
-		"width": 100,
+		"width": 80,
 		"paddingLeft": 10,
 		"paddingRight": 10,
 		"color": "black",
@@ -69,11 +69,11 @@
 		"borderColor": "#aaaaaa",
 		"fontFamily": "Poppins-Regular",
 		"paddingBottom": 5,
-		"fontSize": 16,
+		"fontSize": 5,
 		"marginTop": 20
 	},
 	"loginBtn": {
-		"width": 100,
+		"width": 80,
 		"backgroundColor": "#e64d00",
 		"padding": 10,
 		"borderRadius": 30
@@ -90,7 +90,8 @@
 	},
 	"fpBtnText": {
 		"color": "#141414",
-		"fontFamily": "Poppins-Medium"
+		"fontFamily": "Poppins-Medium",
+		"fontSize": 4
 	},
 	"homepageView": {
 		"width": 100,
