@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -10,6 +10,7 @@ import {
   ScrollView,
   TextInput,
   Image,
+  Keyboard,
 } from 'react-native';
 import styles from './styles';
 import axios from 'axios';
@@ -49,164 +50,11 @@ function CommentView(token) {
               <InnerCommentView {...props} setTitle={setTitle} token={token} />
             )}
           </CommentStack.Screen>
-          <CommentStack.Screen name="Chat">
-            {props => (
-              <ChatRoomListView {...props} setTitle={setTitle} token={token} />
-            )}
-          </CommentStack.Screen>
         </CommentStack.Navigator>
       </NavigationContainer>
     </>
   );
 }
-
-const ChatRoomListView = props => {
-  const [chat, setChat] = useState([]);
-  const fetchChat = props => {
-    axios({
-      url: 'http://147.158.196.71:9595/api/v1/chat/fetch-chat/26e628d4-8f50-47fe-b80f-7b13cd046d88',
-      method: 'GET',
-      headers: {
-        Authorization: 'Token ' + props.token,
-      },
-    })
-      .then(r => setChat(r.data))
-      .catch(err => err);
-  };
-
-  React.useEffect(() => {
-    props.setTitle('Chat');
-    const unsubscribe = props.navigation.addListener('transitionStart', e => {
-      if (e.data.closing) {
-        props.setTitle('Comment');
-      }
-    });
-
-    return unsubscribe;
-  }, [props]);
-
-  React.useEffect(() => {
-    const fetchChatInterval = setInterval(() => fetchChat(props), 3000);
-    return () => clearInterval(fetchChatInterval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        marginBottom: 10,
-      }}>
-      <ScrollView
-        style={{
-          width: '100%',
-          marginTop: 10,
-          marginBottom: 10,
-          paddingBottom: 100,
-          paddingHorizontal: 20,
-        }}>
-        {chat.data
-          ? (() => {
-              return chat.data.map(e => {
-                return (
-                  <View
-                    style={{
-                      alignSelf:
-                        chat.self === e.author.id ? 'flex-end' : 'flex-start',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginBottom: 20,
-                    }}
-                    key={e.id}>
-                    {chat.self === e.author.id ? (
-                      <Text
-                        style={{
-                          marginRight: 10,
-                          fontSize: wp(2.8),
-                          color: '#BBBBBB',
-                          fontFamily: 'Poppins-Regular',
-                          marginTop: 3,
-                        }}>
-                        {e.time}
-                      </Text>
-                    ) : null}
-                    {chat.self !== e.author.id ? (
-                      <Image
-                        style={{
-                          width: wp(10),
-                          height: wp(10),
-                          borderRadius: 100,
-                          marginRight: 10,
-                        }}
-                        source={{
-                          uri: 'http://147.158.196.71:9595' + e.author.avatar,
-                        }}
-                      />
-                    ) : null}
-                    <Text
-                      style={{
-                        paddingBottom: 6,
-                        paddingTop: 10,
-                        paddingHorizontal: 20,
-                        backgroundColor: 'white',
-                        borderRadius: 10,
-                        maxWidth: '70%',
-                        color: '#141414',
-                        fontFamily: 'Poppins-Regular',
-                        fontSize: wp(3.5),
-                      }}>
-                      {e.content}
-                    </Text>
-                    {chat.self === e.author.id ? (
-                      <Image
-                        style={{
-                          width: wp(10),
-                          height: wp(10),
-                          borderRadius: 100,
-                          marginLeft: 10,
-                        }}
-                        source={{
-                          uri: 'http://147.158.196.71:9595' + e.author.avatar,
-                        }}
-                      />
-                    ) : null}
-                    {chat.self !== e.author.id ? (
-                      <Text
-                        style={{
-                          marginLeft: 10,
-                          fontSize: wp(2.8),
-                          color: '#BBBBBB',
-                          fontFamily: 'Poppins-Regular',
-                          marginTop: 3,
-                        }}>
-                        {e.time}
-                      </Text>
-                    ) : null}
-                  </View>
-                );
-              });
-            })()
-          : null}
-      </ScrollView>
-      <TextInput
-        style={{
-          width: wp(90),
-          height: 40,
-          backgroundColor: 'white',
-          color: 'black',
-          borderRadius: 100,
-          paddingHorizontal: 15,
-          paddingBottom: 6,
-          fontFamily: 'Poppins-Regular',
-        }}
-        placeholder="Type a message"
-        placeholderTextColor="#aaaaaa"
-      />
-    </View>
-  );
-};
 
 const InnerCommentView = props => {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -215,7 +63,6 @@ const InnerCommentView = props => {
     getComments(new Date(new Date().getFullYear(), month, 1), props.token).then(
       r => setComments(r),
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [month, props.token]);
   const [comments, setComments] = useState(null);
   React.useEffect(() => {
@@ -416,11 +263,6 @@ const InnerCommentView = props => {
               )[0]?.author_name
             : ''}
         </Text>
-        <Pressable
-          style={{...styles.chatButton, top: hp(80) - 60}}
-          onPress={() => props.navigation.navigate('Chat')}>
-          <Ionicons name="chatbox-outline" style={{color: 'white'}} size={27} />
-        </Pressable>
       </View>
     </>
   );

@@ -28,6 +28,7 @@ import DialogBox from 'react-native-dialogbox';
 import styles from './styles';
 import CommentView from './Comment';
 import Topbar from './Topbar';
+import ChatView from './Chat';
 
 const FadeInView = props => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -184,7 +185,7 @@ const LoginView = props => {
   );
 };
 
-const HomepageView = (token, setToken) => {
+const ProfileView = (token, setToken) => {
   const [data, setData] = useState(null);
 
   useEffect(() => {
@@ -357,11 +358,11 @@ const SettingsView = (token, setToken) => {
 };
 
 const TabNav = [
-  ['Home', HomepageView, 'home-outline'],
+  ['Profile', ProfileView, 'account-outline'],
   ['Work', WorkView, 'notebook-outline'],
-  ['Comment', CommentView, 'comment-multiple-outline'],
+  ['Comment', CommentView, 'comment-quote-outline'],
+  ['Chat', ChatView, 'comment-text-multiple-outline'],
   ['Payment', PaymentView, 'credit-card-outline'],
-  ['Settings', SettingsView, 'account-outline'],
 ];
 
 const bottomTabNavigator = (token, setToken) =>
@@ -370,7 +371,7 @@ const bottomTabNavigator = (token, setToken) =>
       TabNav.map(([label, component, icon]) => [
         label,
         {
-          screen: () => component(token, setToken),
+          screen: navprops => component(token, setToken, navprops),
           navigationOptions: {
             tabBarIcon: ({tintColor}) => (
               <Icon name={icon} size={26} color={tintColor} />
@@ -380,7 +381,7 @@ const bottomTabNavigator = (token, setToken) =>
       ]),
     ),
     {
-      initialRouteName: 'Home',
+      initialRouteName: 'Profile',
       tabBarOptions: {
         activeTintColor: '#e64d00',
         showLabel: false,

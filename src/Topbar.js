@@ -1,7 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {View, Text, Alert} from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -16,16 +15,16 @@ const Topbar = ({title}) => {
       <Icon
         style={{color: 'white'}}
         name="menu"
-        size={wp(9)}
+        size={wp(8)}
         onPress={() => {
           Alert.alert('Facebook Button Clicked');
         }}
       />
       <Text style={styles.topbarTitle}>{title}</Text>
-      <MaterialIcons
+      <Icon
         style={{color: 'white'}}
-        name="notifications-none"
-        size={wp(9)}
+        name="cog-outline"
+        size={wp(7)}
         onPress={() => {
           Alert.alert('Facebook Button Clicked');
         }}
