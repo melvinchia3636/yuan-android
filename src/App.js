@@ -123,7 +123,7 @@ const LoginView = props => {
     const fetchToken = async () => {
       const token = await axios({
         method: 'POST',
-        url: 'http://147.158.196.71:9595/api/v1/auth/login',
+        url: 'http://147.158.216.19:9595/api/v1/auth/login',
         data: {
           username: username,
           password: password,
@@ -192,7 +192,7 @@ const ProfileView = (token, setToken) => {
     const fetchUserData = async () => {
       const response = await axios({
         method: 'GET',
-        url: 'http://147.158.196.71:9595/api/v1/user/fetch-user',
+        url: 'http://147.158.216.19:9595/api/v1/user/fetch-user',
         headers: {
           Authorization: 'Token ' + token,
         },
@@ -219,7 +219,7 @@ const ProfileView = (token, setToken) => {
             <Image
               style={styles.avatar}
               source={{
-                uri: 'http://147.158.196.71:9595' + (data ? data.avatar : ''),
+                uri: 'http://147.158.216.19:9595' + (data ? data.avatar : ''),
               }}
             />
           </View>
@@ -307,7 +307,7 @@ const SettingsView = (token, setToken) => {
     const _signOut = async () => {
       const result = await axios({
         method: 'POST',
-        url: 'http://147.158.196.71:9595/api/v1/auth/logout',
+        url: 'http://147.158.216.19:9595/api/v1/auth/logout',
         headers: {
           Authorization: 'Token ' + token,
         },
@@ -362,7 +362,7 @@ const TabNav = [
   ['Work', WorkView, 'notebook-outline'],
   ['Comment', CommentView, 'comment-quote-outline'],
   ['Chat', ChatView, 'comment-text-multiple-outline'],
-  ['Payment', PaymentView, 'credit-card-outline'],
+  ['Payment', SettingsView, 'credit-card-outline'],
 ];
 
 const bottomTabNavigator = (token, setToken) =>

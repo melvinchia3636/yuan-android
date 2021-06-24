@@ -1,23 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useRef} from 'react';
+import React, {useState} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {
-  Text,
-  View,
-  Pressable,
-  ScrollView,
-  TextInput,
-  Image,
-  Keyboard,
-} from 'react-native';
+import {Text, View, Pressable} from 'react-native';
 import styles from './styles';
 import axios from 'axios';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import {widthPercentageToDP as wp} from 'react-native-responsive-screen';
 
 import Topbar from './Topbar';
 require('intl'); // import intl object
@@ -27,7 +16,7 @@ const getComments = async (date, token) => {
   const year = date.getFullYear();
   const month = date.getMonth();
   const comments = await axios({
-    url: `http://147.158.196.71:9595/api/v1/comments/fetch-comments/auto/${year}/${month}`,
+    url: `http://147.158.216.19:9595/api/v1/comments/fetch-comments/auto/${year}/${month}`,
     method: 'GET',
     headers: {
       Authorization: 'Token ' + token,

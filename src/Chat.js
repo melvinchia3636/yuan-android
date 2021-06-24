@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import axios from 'axios';
 import {
   Text,
@@ -16,8 +16,122 @@ import {
 } from 'react-native-responsive-screen';
 import Topbar from './Topbar';
 import FeatherIcons from 'react-native-vector-icons/Feather';
+import {createStackNavigator} from '@react-navigation/stack';
+import {NavigationContainer} from '@react-navigation/native';
 
-const Chat = (token, setToken, navprops) => {
+const ChatStack = createStackNavigator();
+
+function ChatView(token, setToken, navprops) {
+  const [title, setTitle] = useState('Chat');
+  return (
+    <>
+      <Topbar title={title} />
+      <NavigationContainer>
+        <ChatStack.Navigator headerMode="none">
+          <ChatStack.Screen name="ChatIndex">
+            {props => (
+              <ChatIndex
+                {...props}
+                setTitle={setTitle}
+                token={token}
+                navprops={navprops}
+              />
+            )}
+          </ChatStack.Screen>
+          <ChatStack.Screen name="Chat">
+            {props => (
+              <Chat
+                {...props}
+                setTitle={setTitle}
+                token={token}
+                navprops={navprops}
+              />
+            )}
+          </ChatStack.Screen>
+        </ChatStack.Navigator>
+      </NavigationContainer>
+    </>
+  );
+}
+
+const ChatIndex = props => {
+  const [chatRoom, setChatRoom] = useState([]);
+  useEffect(() => {
+    axios({
+      url: 'http://147.158.216.19:9595/api/v1/chat/fetch-chatroom',
+      method: 'GET',
+      headers: {
+        Authorization: 'Token ' + props.token,
+      },
+    }).then(res => setChatRoom(res.data));
+  }, []);
+
+  return (
+    <View>
+      {chatRoom.map(e => (
+        <Pressable
+          key={e.id}
+          style={{
+            flexDirection: 'row',
+            padding: wp(4),
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backgroundColor: 'white',
+            elevation: 5,
+          }}
+          onPress={() => props.navigation.navigate('Chat', {room_id: e.id})}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
+            <Image
+              style={{
+                width: wp(12),
+                height: wp(12),
+                borderRadius: 100,
+                marginRight: 10,
+              }}
+              source={{
+                uri: 'http://147.158.216.19:9595' + e.target[0].avatar,
+              }}
+            />
+            <View>
+              <Text
+                style={{
+                  fontSize: wp(4),
+                  marginTop: 3,
+                  fontFamily: 'Poppins-Medium',
+                }}>
+                {e.target.map(e => e.username).join(', ')}
+              </Text>
+              <Text
+                style={{
+                  fontFamily: 'Poppins-Regular',
+                  color: '#666666',
+                  marginTop: -3,
+                  fontSize: wp(3.5),
+                }}>
+                {e.last_message ? e.last_message.content : 'New Contact'}
+              </Text>
+            </View>
+          </View>
+          <Text
+            style={{
+              fontFamily: 'Poppins-Medium',
+              color: '#666666',
+              fontSize: wp(3),
+            }}>
+            {e.last_message ? e.last_message.time : ''}
+          </Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+};
+
+const Chat = ({token, navprops, ...props}) => {
+  const roomID = props.route.params.room_id;
   const scrollViewRef = useRef();
   const [chat, setChat] = useState([]);
   const [message, setMessage] = useState('');
@@ -25,7 +139,7 @@ const Chat = (token, setToken, navprops) => {
     if (message) {
       setMessage('');
       axios({
-        url: 'http://147.158.196.71:9595/api/v1/chat/update-chat/26e628d4-8f50-47fe-b80f-7b13cd046d88',
+        url: 'http://147.158.216.19:9595/api/v1/chat/update-chat/' + roomID,
         method: 'POST',
         headers: {
           Authorization: 'Token ' + token,
@@ -40,9 +154,10 @@ const Chat = (token, setToken, navprops) => {
         .catch(err => console.log(err));
     }
   };
+
   const fetchChat = () => {
     axios({
-      url: 'http://147.158.196.71:9595/api/v1/chat/fetch-chat/26e628d4-8f50-47fe-b80f-7b13cd046d88',
+      url: 'http://147.158.216.19:9595/api/v1/chat/fetch-chat/' + roomID,
       method: 'GET',
       headers: {
         Authorization: 'Token ' + token,
@@ -56,17 +171,26 @@ const Chat = (token, setToken, navprops) => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
       () => {
-        scrollViewRef.current.scrollToEnd({animated: true});
+        scrollViewRef.current
+          ? scrollViewRef.current.scrollToEnd({animated: true})
+          : '';
       },
     );
     const keyboardDidHideListener = Keyboard.addListener(
       'keyboardDidHide',
       () => {
-        scrollViewRef.current.scrollToEnd({animated: true});
+        scrollViewRef.current ? scrollViewRef.current.scrollToEnd({animated: true}) : "";
       },
     );
     fetchChat();
     const fetchChatInterval = setInterval(() => fetchChat(), 3000);
+    props.navigation.addListener('didBlur', payload => {
+      try {
+        clearInterval(fetchChatInterval);
+      } catch {
+        e => console.log(e);
+      }
+    });
     navprops.navigation.addListener('didBlur', payload => {
       try {
         clearInterval(fetchChatInterval);
@@ -74,9 +198,9 @@ const Chat = (token, setToken, navprops) => {
         e => console.log(e);
       }
     });
-    navprops.navigation.addListener('didFocus', payload => {
+    navprops.navigation.addListener('didFocus', () => {
       const fetchChatInterval = setInterval(() => fetchChat(), 3000);
-      navprops.navigation.addListener('didBlur', payload => {
+      navprops.navigation.addListener('didBlur', () => {
         try {
           clearInterval(fetchChatInterval);
         } catch {
@@ -84,12 +208,14 @@ const Chat = (token, setToken, navprops) => {
         }
       });
     });
+    return () => {
+      clearInterval(fetchChatInterval);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <>
-      <Topbar title="Chat" />
       <View
         style={{
           flex: 1,
@@ -144,7 +270,7 @@ const Chat = (token, setToken, navprops) => {
                             marginRight: 10,
                           }}
                           source={{
-                            uri: 'http://147.158.196.71:9595' + e.author.avatar,
+                            uri: 'http://147.158.216.19:9595' + e.author.avatar,
                           }}
                         />
                       ) : null}
@@ -171,7 +297,7 @@ const Chat = (token, setToken, navprops) => {
                             marginLeft: 10,
                           }}
                           source={{
-                            uri: 'http://147.158.196.71:9595' + e.author.avatar,
+                            uri: 'http://147.158.216.19:9595' + e.author.avatar,
                           }}
                         />
                       ) : null}
@@ -228,4 +354,4 @@ const Chat = (token, setToken, navprops) => {
   );
 };
 
-export default Chat;
+export default ChatView;
