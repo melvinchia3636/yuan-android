@@ -15,6 +15,7 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import Topbar from './Topbar';
+import {ip} from './constant';
 import FeatherIcons from 'react-native-vector-icons/Feather';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
@@ -56,14 +57,17 @@ function ChatView(token, setToken, navprops) {
 
 const ChatIndex = props => {
   const [chatRoom, setChatRoom] = useState([]);
-  useEffect(() => {
+  const fetchChatRoom = () => {
     axios({
-      url: 'http://147.158.216.19:9595/api/v1/chat/fetch-chatroom',
+      url: `http://${ip}/api/v1/chat/fetch-chatroom`,
       method: 'GET',
       headers: {
         Authorization: 'Token ' + props.token,
       },
     }).then(res => setChatRoom(res.data));
+  };
+  useEffect(() => {
+    fetchChatRoom();
   }, []);
 
   return (
@@ -93,7 +97,7 @@ const ChatIndex = props => {
                 marginRight: 10,
               }}
               source={{
-                uri: 'http://147.158.216.19:9595' + e.target[0].avatar,
+                uri: 'http://' + ip + e.target[0].avatar,
               }}
             />
             <View>
@@ -111,7 +115,9 @@ const ChatIndex = props => {
                   color: '#666666',
                   marginTop: -3,
                   fontSize: wp(3.5),
-                }}>
+                  maxWidth: wp(60)
+                }}
+                ellipsizeMode='tail' numberOfLines={1}>
                 {e.last_message ? e.last_message.content : 'New Contact'}
               </Text>
             </View>
@@ -135,11 +141,12 @@ const Chat = ({token, navprops, ...props}) => {
   const scrollViewRef = useRef();
   const [chat, setChat] = useState([]);
   const [message, setMessage] = useState('');
+  let fetchChatInterval;
   const sendMessage = () => {
     if (message) {
       setMessage('');
       axios({
-        url: 'http://147.158.216.19:9595/api/v1/chat/update-chat/' + roomID,
+        url: `http://${ip}/api/v1/chat/update-chat/` + roomID,
         method: 'POST',
         headers: {
           Authorization: 'Token ' + token,
@@ -157,7 +164,7 @@ const Chat = ({token, navprops, ...props}) => {
 
   const fetchChat = () => {
     axios({
-      url: 'http://147.158.216.19:9595/api/v1/chat/fetch-chat/' + roomID,
+      url: `http://${ip}/api/v1/chat/fetch-chat/` + roomID,
       method: 'GET',
       headers: {
         Authorization: 'Token ' + token,
@@ -179,34 +186,30 @@ const Chat = ({token, navprops, ...props}) => {
     const keyboardDidHideListener = Keyboard.addListener(
       'keyboardDidHide',
       () => {
-        scrollViewRef.current ? scrollViewRef.current.scrollToEnd({animated: true}) : "";
+        scrollViewRef.current
+          ? scrollViewRef.current.scrollToEnd({animated: true})
+          : '';
       },
     );
     fetchChat();
-    const fetchChatInterval = setInterval(() => fetchChat(), 3000);
-    props.navigation.addListener('didBlur', payload => {
-      try {
-        clearInterval(fetchChatInterval);
-      } catch {
-        e => console.log(e);
-      }
-    });
-    navprops.navigation.addListener('didBlur', payload => {
-      try {
-        clearInterval(fetchChatInterval);
-      } catch {
-        e => console.log(e);
-      }
-    });
-    navprops.navigation.addListener('didFocus', () => {
-      const fetchChatInterval = setInterval(() => fetchChat(), 3000);
-      navprops.navigation.addListener('didBlur', () => {
+    props.navigation.addListener('focus', () => {
+      console.log('yeah');
+      fetchChatInterval = setInterval(() => fetchChat(), 3000);
+      props.navigation.addListener('blur', payload => {
         try {
           clearInterval(fetchChatInterval);
         } catch {
           e => console.log(e);
         }
       });
+    });
+    navprops.navigation.addListener('didBlur', () => {
+      props.navigation.navigate('ChatIndex');
+      try {
+        clearInterval(fetchChatInterval);
+      } catch {
+        e => console.log(e);
+      }
     });
     return () => {
       clearInterval(fetchChatInterval);
@@ -270,7 +273,7 @@ const Chat = ({token, navprops, ...props}) => {
                             marginRight: 10,
                           }}
                           source={{
-                            uri: 'http://147.158.216.19:9595' + e.author.avatar,
+                            uri: 'http://' + ip + e.author.avatar,
                           }}
                         />
                       ) : null}
@@ -297,7 +300,7 @@ const Chat = ({token, navprops, ...props}) => {
                             marginLeft: 10,
                           }}
                           source={{
-                            uri: 'http://147.158.216.19:9595' + e.author.avatar,
+                            uri: 'http://' + ip + e.author.avatar,
                           }}
                         />
                       ) : null}

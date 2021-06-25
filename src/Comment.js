@@ -9,6 +9,8 @@ import axios from 'axios';
 import {widthPercentageToDP as wp} from 'react-native-responsive-screen';
 
 import Topbar from './Topbar';
+import {ip} from './constant';
+
 require('intl'); // import intl object
 require('intl/locale-data/jsonp/en-IN'); // load the required locale details
 
@@ -16,7 +18,7 @@ const getComments = async (date, token) => {
   const year = date.getFullYear();
   const month = date.getMonth();
   const comments = await axios({
-    url: `http://147.158.216.19:9595/api/v1/comments/fetch-comments/auto/${year}/${month}`,
+    url: `http://${ip}/api/v1/comments/fetch-comments/auto/${year}/${month}`,
     method: 'GET',
     headers: {
       Authorization: 'Token ' + token,

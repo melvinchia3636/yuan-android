@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Sound from 'react-native-sound';
 
 import {createAppContainer} from 'react-navigation';
 import {createBottomTabNavigator} from 'react-navigation-tabs';
@@ -29,6 +30,7 @@ import styles from './styles';
 import CommentView from './Comment';
 import Topbar from './Topbar';
 import ChatView from './Chat';
+import {ip} from './constant';
 
 const FadeInView = props => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -123,7 +125,7 @@ const LoginView = props => {
     const fetchToken = async () => {
       const token = await axios({
         method: 'POST',
-        url: 'http://147.158.216.19:9595/api/v1/auth/login',
+        url: `http://${ip}/api/v1/auth/login`,
         data: {
           username: username,
           password: password,
@@ -143,6 +145,7 @@ const LoginView = props => {
       });
       if (token) {
         await AsyncStorage.setItem('@auth_token', token.data.token);
+        notifications.requestUserPermission(token.data.token);
         props.setToken(token.data.token);
       }
     };
@@ -192,7 +195,7 @@ const ProfileView = (token, setToken) => {
     const fetchUserData = async () => {
       const response = await axios({
         method: 'GET',
-        url: 'http://147.158.216.19:9595/api/v1/user/fetch-user',
+        url: `http://${ip}/api/v1/user/fetch-user`,
         headers: {
           Authorization: 'Token ' + token,
         },
@@ -219,7 +222,7 @@ const ProfileView = (token, setToken) => {
             <Image
               style={styles.avatar}
               source={{
-                uri: 'http://147.158.216.19:9595' + (data ? data.avatar : ''),
+                uri: 'http://' + ip + (data ? data.avatar : ''),
               }}
             />
           </View>
@@ -305,14 +308,19 @@ const PaymentView = () => {
 const SettingsView = (token, setToken) => {
   const signOut = () => {
     const _signOut = async () => {
+      const fcm_token = await AsyncStorage.getItem('@fcm_token');
       const result = await axios({
         method: 'POST',
-        url: 'http://147.158.216.19:9595/api/v1/auth/logout',
+        url: `http://${ip}/api/v1/auth/logout`,
         headers: {
           Authorization: 'Token ' + token,
         },
+        data: {
+          fcm_token: fcm_token,
+        },
       }).catch(err => console.log(err));
       if (result) {
+        await AsyncStorage.removeItem('@fcm_token');
         await AsyncStorage.removeItem('@auth_token');
         setToken(null);
       }
@@ -404,12 +412,31 @@ const App = () => {
   const [needLoad, setNeedLoad] = useState(true);
 
   useEffect(() => {
-    notifications.requestUserPermission();
+    const getToken = async () => {
+      const [[, auth_token], [, fcm_token]] = await AsyncStorage.multiGet([
+        '@auth_token',
+        '@fcm_token',
+      ]);
+      if (auth_token !== null) {
+        setToken(auth_token);
+        return [auth_token, fcm_token];
+      }
+    };
+    getToken().then(([auth_token, fcm_token]) => {
+      if (!fcm_token) {
+        if (auth_token) {
+          notifications.requestUserPermission(auth_token);
+        }
+      }
+    });
     const unsubscribe = messaging().onMessage(async remoteMessage => {
-      Alert.alert(
-        remoteMessage.notification.title,
-        remoteMessage.notification.body,
-      );
+      const sound = new Sound('notification.wav', Sound.MAIN_BUNDLE, error => {
+        if (error) {
+          console.log('failed to load the sound', error);
+          return;
+        }
+        sound.play();
+      });
     });
 
     // Check whether an initial notification is available
@@ -422,16 +449,6 @@ const App = () => {
       });
 
     return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    const getToken = async () => {
-      const token_in_storage = await AsyncStorage.getItem('@auth_token');
-      if (token_in_storage !== null) {
-        setToken(token_in_storage);
-      }
-    };
-    getToken();
   }, []);
 
   return (
