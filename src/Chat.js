@@ -115,9 +115,10 @@ const ChatIndex = props => {
                   color: '#666666',
                   marginTop: -3,
                   fontSize: wp(3.5),
-                  maxWidth: wp(60)
+                  maxWidth: wp(60),
                 }}
-                ellipsizeMode='tail' numberOfLines={1}>
+                ellipsizeMode="tail"
+                numberOfLines={1}>
                 {e.last_message ? e.last_message.content : 'New Contact'}
               </Text>
             </View>
@@ -212,6 +213,8 @@ const Chat = ({token, navprops, ...props}) => {
       }
     });
     return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
       clearInterval(fetchChatInterval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -17,7 +17,6 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import Sound from 'react-native-sound';
 
 import {createAppContainer} from 'react-navigation';
 import {createBottomTabNavigator} from 'react-navigation-tabs';
@@ -429,15 +428,7 @@ const App = () => {
         }
       }
     });
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      const sound = new Sound('notification.wav', Sound.MAIN_BUNDLE, error => {
-        if (error) {
-          console.log('failed to load the sound', error);
-          return;
-        }
-        sound.play();
-      });
-    });
+    const unsubscribe = messaging().onMessage(async remoteMessage => {});
 
     // Check whether an initial notification is available
     messaging()
@@ -458,7 +449,7 @@ const App = () => {
         width: '100%',
         height: '100%',
       }}>
-      <StatusBar backgroundColor="#e64d00" />
+      <StatusBar backgroundColor="#b33c00" />
       {token === null ? (
         <LoginView setToken={setToken} />
       ) : (

@@ -1,9 +1,18 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {Text, View, Pressable} from 'react-native';
+import FeatherIcons from 'react-native-vector-icons/Feather';
+import {
+  Text,
+  View,
+  Pressable,
+  ScrollView,
+  Image,
+  TextInput,
+  Keyboard,
+} from 'react-native';
 import styles from './styles';
 import axios from 'axios';
 import {widthPercentageToDP as wp} from 'react-native-responsive-screen';
@@ -33,12 +42,22 @@ function CommentView(token) {
   const [title, setTitle] = useState('Comment');
   return (
     <>
-      <Topbar title={title} />
       <NavigationContainer>
         <CommentStack.Navigator headerMode="none">
-          <CommentStack.Screen name="Comment">
+          <CommentStack.Screen name="Calendar">
             {props => (
-              <InnerCommentView {...props} setTitle={setTitle} token={token} />
+              <>
+                <Topbar title="Comment" />
+                <CalendarView {...props} setTitle={setTitle} token={token} />
+              </>
+            )}
+          </CommentStack.Screen>
+          <CommentStack.Screen name="EachComment">
+            {props => (
+              <>
+                <Topbar title={title} goback={props.navigation.goBack} />
+                <EachCommentView {...props} setTitle={setTitle} token={token} />
+              </>
             )}
           </CommentStack.Screen>
         </CommentStack.Navigator>
@@ -47,7 +66,7 @@ function CommentView(token) {
   );
 }
 
-const InnerCommentView = props => {
+const CalendarView = props => {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [choosenDate, setChoosenDate] = useState(new Date());
   React.useEffect(() => {
@@ -56,13 +75,6 @@ const InnerCommentView = props => {
     );
   }, [month, props.token]);
   const [comments, setComments] = useState(null);
-  React.useEffect(() => {
-    const unsubscribe = props.navigation.addListener('transitionStart', e => {
-      console.log('erhewths');
-    });
-
-    return unsubscribe;
-  }, [props.navigation]);
 
   return (
     <>
@@ -236,7 +248,18 @@ const InnerCommentView = props => {
             justifyContent: 'space-between',
           }}>
           <Text style={styles.homepageSectionHeader}>Today's Comment</Text>
-          <Text style={styles.viewCommentBtn}>View</Text>
+          {comments?.filter(
+            e => new Date(e.date).getDate() === choosenDate.getDate(),
+          )[0] ? (
+            <Pressable
+              onPress={() =>
+                props.navigation.navigate('EachComment', {
+                  choosenDate: choosenDate.toDateString(),
+                })
+              }>
+              <Text style={styles.viewCommentBtn}>View</Text>
+            </Pressable>
+          ) : null}
         </View>
         <View style={{...styles.homepageSectionHeaderSeperator, height: 3}} />
         <Text style={styles.homepageComment} numberOfLines={1}>
@@ -246,16 +269,227 @@ const InnerCommentView = props => {
               )[0]?.content
             : ''}
         </Text>
-        <Text style={{...styles.homepageCommentAuthor, textAlign: 'left'}}>
-          -{' '}
-          {comments
-            ? comments.filter(
-                e => new Date(e.date).getDate() === choosenDate.getDate(),
-              )[0]?.author_name
-            : ''}
-        </Text>
+        {comments?.filter(
+          e => new Date(e.date).getDate() === choosenDate.getDate(),
+        )[0] ? (
+          <Text style={{...styles.homepageCommentAuthor, marginTop: 3}}>
+            -{' '}
+            {comments
+              ? comments.filter(
+                  e => new Date(e.date).getDate() === choosenDate.getDate(),
+                )[0]?.author_name
+              : ''}
+          </Text>
+        ) : null}
       </View>
     </>
+  );
+};
+
+const EachCommentView = props => {
+  const date = new Date(props.route.params.choosenDate);
+
+  props.setTitle(
+    date.toLocaleDateString('en-GB', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    }),
+  );
+
+  const [comment, setComment] = useState({});
+  const [replies, setReplies] = useState({});
+  const [message, setMessage] = useState('');
+  const scrollViewRef = useRef();
+
+  const updateReplies = data => {
+    axios({
+      url: `http://${ip}/api/v1/comments/fetch-replies/auto/${data.id}`,
+      method: 'GET',
+      headers: {
+        Authorization: 'Token ' + props.token,
+      },
+    })
+      .then(res => {
+        setReplies(res.data);
+      })
+      .catch(err => console.log(err));
+  };
+
+  const sendReply = () => {
+    if (message) {
+      axios({
+        url: `http://${ip}/api/v1/comments/add-reply/${comment.id}`,
+        method: 'PUT',
+        data: {
+          reply: message,
+        },
+        headers: {
+          Authorization: 'Token ' + props.token,
+        },
+      }).then(() => {
+        updateReplies(comment);
+        setMessage('');
+      });
+    }
+  };
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        scrollViewRef.current
+          ? scrollViewRef.current.scrollToEnd({animated: true})
+          : '';
+      },
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        scrollViewRef.current
+          ? scrollViewRef.current.scrollToEnd({animated: true})
+          : '';
+      },
+    );
+    axios({
+      url: `http://${ip}/api/v1/comments/fetch-comment/auto/${date.getFullYear()}/${
+        date.getMonth() + 1
+      }/${date.getDate()}`,
+      method: 'GET',
+      headers: {
+        Authorization: 'Token ' + props.token,
+      },
+    })
+      .then(res => {
+        const data = JSON.parse(res.data);
+        setComment(data);
+        updateReplies(data);
+      })
+      .catch(err => console.log(err));
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <ScrollView
+      style={{
+        paddingHorizontal: wp(6),
+        paddingTop: wp(6),
+      }}
+      ref={scrollViewRef}
+      onContentSizeChange={() =>
+        scrollViewRef.current.scrollToEnd({animated: true})
+      }
+      contentContainerStyle={{flexDirection: 'column'}}>
+      <View style={{flexDirection: 'row'}}>
+        <Text
+          style={{
+            fontSize: wp(16),
+            fontFamily: 'Poppins-Regular',
+            marginTop: -wp(5),
+            marginRight: 10,
+          }}>
+          “
+        </Text>
+        <Text
+          style={{
+            fontSize: wp(4),
+            fontFamily: 'Poppins-Regular',
+            width: wp(78),
+            color: 'black',
+            marginBottom: wp(8),
+          }}>
+          {comment.content}
+        </Text>
+      </View>
+      <View>
+        <Text
+          style={{
+            color: 'black',
+            fontSize: wp(6),
+            fontFamily: 'Poppins-Medium',
+          }}>
+          Replies
+        </Text>
+        <Text
+          style={{
+            fontFamily: 'Poppins-Medium',
+            color: '#888888',
+            marginBottom: 20,
+          }}>
+          {replies.count || 0} replies
+        </Text>
+        <View style={{marginBottom: wp(4)}}>
+          {replies.content
+            ? replies.content.map(e => (
+                <View style={{flexDirection: 'row', marginBottom: 20}}>
+                  <Image
+                    style={{
+                      width: wp(12),
+                      height: wp(12),
+                      borderRadius: 100,
+                      marginRight: 10,
+                      marginTop: 5,
+                    }}
+                    source={{
+                      uri: 'http://' + ip + e.avatar,
+                    }}
+                  />
+                  <View style={{width: '84%'}}>
+                    <Text
+                      style={{
+                        fontFamily: 'Poppins-Medium',
+                      }}>
+                      {e.author}
+                    </Text>
+                    <Text
+                      style={{
+                        fontFamily: 'Poppins-Regular',
+                        color: '#141414',
+                      }}>
+                      {e.content}
+                    </Text>
+                  </View>
+                </View>
+              ))
+            : null}
+        </View>
+      </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: wp(12),
+        }}>
+        <TextInput
+          style={{
+            backgroundColor: 'white',
+            color: '#141414',
+            paddingBottom: 8,
+            paddingHorizontal: 20,
+            fontFamily: 'Poppins-Regular',
+            borderRadius: 100,
+            width: '90%',
+          }}
+          placeholderTextColor="#999999"
+          placeholder="Type your reply here"
+          value={message}
+          onChangeText={setMessage}
+        />
+        <Pressable onPress={sendReply} style={{marginLeft: 4, padding: 5}}>
+          <FeatherIcons
+            name="send"
+            size={wp(6)}
+            style={{transform: [{rotate: '45deg'}]}}
+          />
+        </Pressable>
+      </View>
+    </ScrollView>
   );
 };
 
