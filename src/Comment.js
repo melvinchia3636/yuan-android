@@ -330,6 +330,7 @@ const EachCommentView = props => {
       }).then(() => {
         updateReplies(comment);
         setMessage('');
+        scrollViewRef.current.scrollToEnd({animated: true});
       });
     }
   };
@@ -381,9 +382,6 @@ const EachCommentView = props => {
         paddingTop: wp(6),
       }}
       ref={scrollViewRef}
-      onContentSizeChange={() =>
-        scrollViewRef.current.scrollToEnd({animated: true})
-      }
       contentContainerStyle={{flexDirection: 'column'}}>
       <View style={{flexDirection: 'row'}}>
         <Text
@@ -426,7 +424,9 @@ const EachCommentView = props => {
         <View style={{marginBottom: wp(4)}}>
           {replies.content
             ? replies.content.map(e => (
-                <View style={{flexDirection: 'row', marginBottom: 20}}>
+                <View
+                  style={{flexDirection: 'row', marginBottom: 20}}
+                  key={e.id}>
                   <Image
                     style={{
                       width: wp(12),

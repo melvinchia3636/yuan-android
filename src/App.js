@@ -29,6 +29,7 @@ import styles from './styles';
 import CommentView from './Comment';
 import Topbar from './Topbar';
 import ChatView from './Chat';
+import WorkView from './Work';
 import {ip} from './constant';
 
 const FadeInView = props => {
@@ -265,23 +266,6 @@ const ProfileView = (token, setToken) => {
             </ScrollView>
           ) : null}
         </View>
-      </View>
-    </>
-  );
-};
-
-const WorkView = () => {
-  return (
-    <>
-      <Topbar title="Work" />
-      <View style={styles.settingsView}>
-        <Text
-          style={{
-            fontFamily: 'Poppins-Medium',
-            fontSize: 24,
-          }}>
-          Work
-        </Text>
       </View>
     </>
   );
