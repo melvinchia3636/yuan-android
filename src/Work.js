@@ -11,9 +11,13 @@ import {
 } from 'react-native-responsive-screen';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/Feather';
+import Feather from 'react-native-vector-icons/Feather';
+import Entypo from 'react-native-vector-icons/Entypo';
+
+import SlidingPanel from 'react-native-sliding-up-down-panels';
 
 const WorkStack = createStackNavigator();
+const EachWorkStack = createStackNavigator();
 
 function choose(choices) {
   var index = Math.floor(Math.random() * choices.length);
@@ -21,7 +25,6 @@ function choose(choices) {
 }
 
 function WorkView(token, setToken, navprops) {
-  const [title, setTitle] = useState('Work');
   return (
     <>
       <NavigationContainer>
@@ -37,8 +40,30 @@ function WorkView(token, setToken, navprops) {
           <WorkStack.Screen name="Work">
             {props => (
               <>
-                <Topbar title={title} goback={props.navigation.goBack} />
-                <Work {...props} setTitle={setTitle} token={token} />
+                <WorkStack.Navigator headerMode="none">
+                  <WorkStack.Screen name="WorkView">
+                    {() => (
+                      <>
+                        <Topbar
+                          title="Classroom"
+                          goback={props.navigation.goBack}
+                        />
+                        <Work {...props} token={token} />
+                      </>
+                    )}
+                  </WorkStack.Screen>
+                  <WorkStack.Screen name="EachWork">
+                    {props => (
+                      <>
+                        <Topbar
+                          title="Class Work"
+                          goback={props.navigation.goBack}
+                        />
+                        <EachWork {...props} token={token} />
+                      </>
+                    )}
+                  </WorkStack.Screen>
+                </WorkStack.Navigator>
               </>
             )}
           </WorkStack.Screen>
@@ -118,7 +143,6 @@ const Work = ({token, ...props}) => {
   const [classWork, setClassWork] = useState([]);
 
   useEffect(() => {
-    props.setTitle('');
     fetchClassWorks().then(res => setClassWork(res));
   }, []);
 
@@ -151,7 +175,7 @@ const Work = ({token, ...props}) => {
         </Text>
       </View>
       {classWork.map(e => (
-        <View
+        <Pressable
           key={e.id}
           style={{
             backgroundColor: 'white',
@@ -160,8 +184,9 @@ const Work = ({token, ...props}) => {
             borderRadius: 8,
             flexDirection: 'row',
             alignItems: 'center',
-          }}>
-          <Icon
+          }}
+          onPress={() => props.navigation.navigate('EachWork', {id: e.id})}>
+          <Feather
             name={choose(['paperclip', 'clipboard'])}
             size={32}
             color="#999999"
@@ -191,9 +216,146 @@ const Work = ({token, ...props}) => {
               })}
             </Text>
           </View>
-        </View>
+        </Pressable>
       ))}
     </ScrollView>
+  );
+};
+
+const EachWork = ({token, id, ...props}) => {
+  const [workDetails, setWorkDetails] = useState({});
+  const [isExpand, setExpand] = useState(false);
+  const fetchWorkDetails = async () => {
+    const response = await axios({
+      url: `http://${ip}/api/v1/classroom/fetch-classwork/${props.route.params.id}`,
+      headers: {
+        authorization: 'Token ' + token,
+      },
+    }).catch(err => console.log(err));
+    return response ? response.data : {};
+  };
+
+  useEffect(() => {
+    fetchWorkDetails().then(res => setWorkDetails(res));
+  }, []);
+
+  return (
+    <View
+      style={{
+        backgroundColor: 'white',
+        height: '100%',
+      }}>
+      <Text
+        style={{
+          fontSize: wp(3.5),
+          paddingTop: 20,
+          paddingHorizontal: 20,
+          fontFamily: 'Poppins-Medium',
+        }}>
+        {workDetails.time
+          ? new Date(workDetails.time).toLocaleString('en-GB', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+              hour: 'numeric',
+              minute: 'numeric',
+            })
+          : null}
+      </Text>
+      <Text
+        style={{
+          fontFamily: 'Poppins-Medium',
+          fontSize: wp(6.8),
+          paddingHorizontal: 20,
+          color: '#141414',
+          lineHeight: wp(8),
+          marginBottom: 10,
+        }}>
+        {workDetails.title}
+      </Text>
+      <Text
+        style={{
+          borderTopWidth: 1,
+          marginHorizontal: 20,
+          fontSize: wp(3.5),
+          paddingTop: 20,
+          fontFamily: 'Poppins-Regular',
+          color: '#141414',
+        }}>
+        {workDetails.details}
+      </Text>
+      <SlidingPanel
+        headerLayoutHeight={wp(55)}
+        AnimationSpeed={300}
+        allowDragging={false}
+        onAnimationStart={() => {
+          setExpand(!isExpand);
+          console.log(isExpand);
+        }}
+        headerLayout={() => (
+          <View
+            style={{
+              backgroundColor: 'white',
+              width: wp(100),
+              height: hp(100),
+              borderRadius: 25,
+              elevation: 15,
+              paddingHorizontal: 20,
+              paddingVertical: 15,
+              borderWidth: 1,
+              borderColor: 'rgba(0, 0, 0, 0.08)',
+            }}>
+            <View
+              style={{
+                width: '100%',
+                alignItems: 'center',
+              }}>
+              <Entypo
+                name={`chevron-${isExpand ? 'down' : 'up'}`}
+                size={wp(5)}
+                color="#999999"
+                width={100}
+              />
+            </View>
+            <Text
+              style={{
+                color: '#141414',
+                fontSize: wp(5),
+                fontFamily: 'Poppins-Regular',
+                marginBottom: 10,
+              }}>
+              Your work
+            </Text>
+            <Pressable
+              style={{
+                backgroundColor: '#e64d00',
+                padding: 5,
+                paddingTop: 8,
+                borderRadius: 5,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <Entypo
+                name="plus"
+                style={{color: 'white', marginTop: -3, marginRight: 5}}
+                size={wp(4.5)}
+              />
+              <Text
+                style={{
+                  color: 'white',
+                  textAlign: 'center',
+                  fontFamily: 'Poppins-Medium',
+                  fontSize: wp(3.5),
+                }}>
+                Add work
+              </Text>
+            </Pressable>
+          </View>
+        )}
+        allowAnimation={true}
+      />
+    </View>
   );
 };
 
