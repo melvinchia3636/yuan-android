@@ -30,6 +30,7 @@
     "react-native": "0.64.2",
     "react-native-animated-loader": "^0.0.9",
     "react-native-dialogbox": "^0.6.10",
+    "react-native-document-picker": "^5.2.0",
     "react-native-elements": "^3.4.1",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-reanimated": "^1.13.3",

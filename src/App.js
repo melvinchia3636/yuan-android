@@ -130,7 +130,8 @@ const LoginView = props => {
           username: username,
           password: password,
         },
-      }).catch(() => {
+      }).catch(e => {
+        console.log(e);
         dialogbox.current.tip({
           title: 'Login Failed',
           content:

@@ -13,23 +13,18 @@ const Topbar = ({title, goback, ...props}) => {
   return (
     <View style={styles.topbar}>
       {goback ? (
-        <Pressable onPress={goback}>
+        <Pressable
+          onPress={goback}
+          style={{
+            paddding: 8,
+          }}>
           <Icon
             style={{color: 'white', marginLeft: -wp(1.5)}}
             name="chevron-left"
             size={wp(8)}
           />
         </Pressable>
-      ) : (
-        <Icon
-          style={{color: 'white'}}
-          name="menu"
-          size={wp(8)}
-          onPress={() => {
-            Alert.alert('Facebook Button Clicked');
-          }}
-        />
-      )}
+      ) : null}
       <Text style={styles.topbarTitle}>{title}</Text>
       <Icon
         style={{color: 'white'}}

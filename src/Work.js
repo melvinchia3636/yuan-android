@@ -15,6 +15,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import Entypo from 'react-native-vector-icons/Entypo';
 
 import SlidingPanel from 'react-native-sliding-up-down-panels';
+import DocumentPicker from 'react-native-document-picker';
 
 const WorkStack = createStackNavigator();
 const EachWorkStack = createStackNavigator();
@@ -130,6 +131,8 @@ const WorkIndex = ({token, ...props}) => {
 
 const Work = ({token, ...props}) => {
   const classroom = props.route.params.classroom;
+  const [classWork, setClassWork] = useState([]);
+
   const fetchClassWorks = async () => {
     const response = await axios({
       url: `http://${ip}/api/v1/classroom/fetch-classworks/${classroom.id}`,
@@ -139,8 +142,6 @@ const Work = ({token, ...props}) => {
     }).catch(err => console.log(err));
     return response ? response.data : [];
   };
-
-  const [classWork, setClassWork] = useState([]);
 
   useEffect(() => {
     fetchClassWorks().then(res => setClassWork(res));
@@ -222,9 +223,71 @@ const Work = ({token, ...props}) => {
   );
 };
 
+const AddWorkButton = ({askForFile, hollow}) => {
+  return (
+    <Pressable
+      onPress={askForFile}
+      style={{
+        backgroundColor: hollow ? 'white' : '#e64d00',
+        padding: 5,
+        paddingTop: 8,
+        borderRadius: 5,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: hollow ? 10 : 0,
+        borderWidth: 1,
+        borderColor: hollow ? 'rgba(0, 0, 0, 0.15)' : 'white',
+      }}>
+      <Entypo
+        name="plus"
+        style={{
+          color: hollow ? '#e64d00' : 'white',
+          marginTop: -3,
+          marginRight: 5,
+        }}
+        size={wp(4.5)}
+      />
+      <Text
+        style={{
+          color: hollow ? '#e64d00' : 'white',
+          textAlign: 'center',
+          fontFamily: 'Poppins-Medium',
+          fontSize: wp(3.5),
+        }}>
+        Add work
+      </Text>
+    </Pressable>
+  );
+};
+
+const HandInButton = ({handInFunc}) => {
+  return (
+    <Pressable
+      onPress={handInFunc}
+      style={{
+        backgroundColor: '#e64d00',
+        padding: 5,
+        paddingTop: 8,
+        borderRadius: 5,
+      }}>
+      <Text
+        style={{
+          color: 'white',
+          textAlign: 'center',
+          fontFamily: 'Poppins-Medium',
+          fontSize: wp(3.5),
+        }}>
+        Hand In
+      </Text>
+    </Pressable>
+  );
+};
+
 const EachWork = ({token, id, ...props}) => {
   const [workDetails, setWorkDetails] = useState({});
   const [isExpand, setExpand] = useState(false);
+  const [myWorks, setMyWorks] = useState([]);
   const fetchWorkDetails = async () => {
     const response = await axios({
       url: `http://${ip}/api/v1/classroom/fetch-classwork/${props.route.params.id}`,
@@ -233,6 +296,27 @@ const EachWork = ({token, id, ...props}) => {
       },
     }).catch(err => console.log(err));
     return response ? response.data : {};
+  };
+
+  const askForFile = async () => {
+    try {
+      const res = await DocumentPicker.pick({
+        type: [DocumentPicker.types.allFiles],
+      });
+      if (!myWorks.map(e => e.name).includes(res.name)) {
+        setMyWorks(myWorks.concat([res]));
+      }
+      this.uploadAPICall(res);
+    } catch (err) {
+      if (DocumentPicker.isCancel(err)) {
+        console.log('error -----', err);
+      } else {
+      }
+    }
+  };
+
+  const handInWork = () => {
+    console.log(myWorks);
   };
 
   useEffect(() => {
@@ -256,7 +340,6 @@ const EachWork = ({token, id, ...props}) => {
           ? new Date(workDetails.time).toLocaleString('en-GB', {
               day: 'numeric',
               month: 'short',
-              year: 'numeric',
               hour: 'numeric',
               minute: 'numeric',
             })
@@ -285,12 +368,11 @@ const EachWork = ({token, id, ...props}) => {
         {workDetails.details}
       </Text>
       <SlidingPanel
-        headerLayoutHeight={wp(55)}
+        headerLayoutHeight={wp(myWorks.length > 0 ? 70 : 55)}
         AnimationSpeed={300}
         allowDragging={false}
         onAnimationStart={() => {
           setExpand(!isExpand);
-          console.log(isExpand);
         }}
         headerLayout={() => (
           <View
@@ -326,31 +408,66 @@ const EachWork = ({token, id, ...props}) => {
               }}>
               Your work
             </Text>
-            <Pressable
-              style={{
-                backgroundColor: '#e64d00',
-                padding: 5,
-                paddingTop: 8,
-                borderRadius: 5,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-              <Entypo
-                name="plus"
-                style={{color: 'white', marginTop: -3, marginRight: 5}}
-                size={wp(4.5)}
-              />
-              <Text
+            {isExpand ? (
+              <View style={{marginBottom: 20}}>
+                {myWorks.map(e => (
+                  <View
+                    style={{
+                      paddingVertical: 5,
+                      paddingHorizontal: 15,
+                      borderRadius: 100,
+                      borderWidth: 1,
+                      borderColor: 'rgba(0, 0, 0, 0.1)',
+                      marginBottom: 5,
+                    }}>
+                    <Text
+                      numberOfLines={1}
+                      style={{
+                        fontFamily: 'Poppins-Medium',
+                        color: '#333333',
+                        lineHeight: wp(5),
+                      }}>
+                      {e.name}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : myWorks.length > 0 ? (
+              <View
                 style={{
-                  color: 'white',
-                  textAlign: 'center',
-                  fontFamily: 'Poppins-Medium',
-                  fontSize: wp(3.5),
+                  paddingVertical: 5,
+                  paddingHorizontal: 15,
+                  borderRadius: 100,
+                  borderWidth: 1,
+                  borderColor: 'rgba(0, 0, 0, 0.1)',
+                  marginBottom: 20,
                 }}>
-                Add work
-              </Text>
-            </Pressable>
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    fontFamily: 'Poppins-Medium',
+                    color: '#333333',
+                  }}>
+                  {myWorks.length === 1
+                    ? myWorks[0].name
+                    : myWorks.length + ' attachments'}
+                </Text>
+              </View>
+            ) : null}
+            {isExpand ? (
+              <View>
+                <AddWorkButton askForFile={askForFile} hollow={true} />
+                <HandInButton handInFunc={handInWork} />
+              </View>
+            ) : (
+              <View>
+                {myWorks.length <= 0 ? (
+                  <AddWorkButton askForFile={askForFile} />
+                ) : (
+                  <HandInButton  handInFunc={handInWork} />
+                )}
+              </View>
+            )}
           </View>
         )}
         allowAnimation={true}

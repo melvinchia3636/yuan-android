@@ -7377,6 +7377,11 @@
   dependencies:
     "prop-types" "^15.6.2"
 
+"react-native-document-picker@^5.2.0":
+  "integrity" "sha512-zXK34hW6fM0gXoo6v7edZZxKvLT7DyjOdBXi7WrxbKqZchDokTEQ/tNTeZxky+7oI8sVz8T3uXBBEW0sp+VfXQ=="
+  "resolved" "https://registry.npmjs.org/react-native-document-picker/-/react-native-document-picker-5.2.0.tgz"
+  "version" "5.2.0"
+
 "react-native-elements@^3.4.1":
   "integrity" "sha512-m0eAWOn7JuR1wNTNY0WHuaqst4LI/gFE4N5Bbyfsc4DiryWsMST7aAg5w/Gos4IexWIzhLKCIkPxthND1m/8Xg=="
   "resolved" "https://registry.npmjs.org/react-native-elements/-/react-native-elements-3.4.2.tgz"
@@ -7504,7 +7509,7 @@
     "prop-types" "^15.7.2"
     "yargs" "^16.1.1"
 
-"react-native@*", "react-native@^0.60.6 || ^0.61.5 || ^0.62.2 || ^0.63.2 || ^0.64.0 || 1000.0.0", "react-native@>=0.30.0", "react-native@>=0.35", "react-native@>=0.42.0", "react-native@>=0.45.0", "react-native@>=0.46", "react-native@>=0.50.0", "react-native@>=0.57", "react-native@>=0.64.0-rc.0 || 0.0.0-*", "react-native@>=0.8.0", "react-native@0.64.2":
+"react-native@*", "react-native@^0.60.6 || ^0.61.5 || ^0.62.2 || ^0.63.2 || ^0.64.0 || 1000.0.0", "react-native@>= 0.33", "react-native@>=0.30.0", "react-native@>=0.35", "react-native@>=0.42.0", "react-native@>=0.45.0", "react-native@>=0.46", "react-native@>=0.50.0", "react-native@>=0.57", "react-native@>=0.64.0-rc.0 || 0.0.0-*", "react-native@>=0.8.0", "react-native@0.64.2":
   "integrity" "sha512-Ty/fFHld9DcYsFZujXYdeVjEhvSeQcwuTGXezyoOkxfiGEGrpL/uwUZvMzwShnU4zbbTKDu2PAm/uwuOittRGA=="
   "resolved" "https://registry.npmjs.org/react-native/-/react-native-0.64.2.tgz"
   "version" "0.64.2"
