@@ -11,7 +11,7 @@ import styles from './styles';
 
 const Topbar = ({title, goback, ...props}) => {
   return (
-    <View style={styles.topbar}>
+    <View style={{...styles.topbar, zIndex: 9999}}>
       {goback ? (
         <Pressable
           onPress={goback}

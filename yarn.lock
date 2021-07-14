@@ -5818,7 +5818,7 @@
   "resolved" "https://registry.npmjs.org/lottie-ios/-/lottie-ios-3.2.3.tgz"
   "version" "3.2.3"
 
-"lottie-react-native@>=3.0.0":
+"lottie-react-native@^4.0.2", "lottie-react-native@>=3.0.0":
   "integrity" "sha512-8X5SV8X+es5dJwUGYcSyRIbHIPeWIcUH6PiRaReUEy+6s1d+NLBp3rj4+9I75F1ZN0nbFGNkrgypnGsXOAXBTw=="
   "resolved" "https://registry.npmjs.org/lottie-react-native/-/lottie-react-native-4.0.2.tgz"
   "version" "4.0.2"

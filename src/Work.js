@@ -19,6 +19,7 @@ import DocumentPicker from 'react-native-document-picker';
 
 const WorkStack = createStackNavigator();
 const EachWorkStack = createStackNavigator();
+import AnimatedLoader from 'react-native-animated-loader';
 
 function choose(choices) {
   var index = Math.floor(Math.random() * choices.length);
@@ -284,9 +285,36 @@ const HandInButton = ({handInFunc}) => {
   );
 };
 
+const UnsubmitButton = ({unsubmitFunc}) => {
+  return (
+    <Pressable
+      onPress={unsubmitFunc}
+      style={{
+        backgroundColor: 'white',
+        padding: 5,
+        paddingTop: 8,
+        borderRadius: 5,
+        borderWidth: 1,
+        borderColor: 'rgba(0, 0, 0, 0.1)',
+      }}>
+      <Text
+        style={{
+          color: '#e64d00',
+          textAlign: 'center',
+          fontFamily: 'Poppins-Medium',
+          fontSize: wp(3.5),
+        }}>
+        Unsubmit
+      </Text>
+    </Pressable>
+  );
+};
+
 const EachWork = ({token, id, ...props}) => {
   const [workDetails, setWorkDetails] = useState({});
   const [isExpand, setExpand] = useState(false);
+  const [isSubmitted, setSubmitted] = useState(false);
+  const [isLoading, setLoading] = useState(false);
   const [myWorks, setMyWorks] = useState([]);
   const fetchWorkDetails = async () => {
     const response = await axios({
@@ -300,13 +328,16 @@ const EachWork = ({token, id, ...props}) => {
 
   const askForFile = async () => {
     try {
-      const res = await DocumentPicker.pick({
+      const ress = await DocumentPicker.pickMultiple({
         type: [DocumentPicker.types.allFiles],
       });
-      if (!myWorks.map(e => e.name).includes(res.name)) {
-        setMyWorks(myWorks.concat([res]));
+      const work = [];
+      for (let res of ress) {
+        if (!myWorks.map(e => e.name).includes(res.name)) {
+          work.push(res);
+        }
       }
-      this.uploadAPICall(res);
+      setMyWorks(myWorks.concat(work));
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
         console.log('error -----', err);
@@ -316,7 +347,26 @@ const EachWork = ({token, id, ...props}) => {
   };
 
   const handInWork = () => {
-    console.log(myWorks);
+    const body = new FormData();
+    myWorks.forEach(item => body.append('file[]', item));
+    setLoading(true);
+
+    fetch(`http://${ip}/api/v1/classroom/upload/${props.route.params.id}`, {
+      headers: {
+        authorization: 'Token ' + token,
+      },
+      method: 'POST',
+      body,
+    })
+      .then(res => {
+        setSubmitted(true);
+        setLoading(false);
+      })
+      .catch(err => console.log(err));
+  };
+
+  const unsubmitWork = () => {
+    setSubmitted(false);
   };
 
   useEffect(() => {
@@ -329,6 +379,23 @@ const EachWork = ({token, id, ...props}) => {
         backgroundColor: 'white',
         height: '100%',
       }}>
+      <AnimatedLoader
+        visible={isLoading}
+        overlayColor="rgba(255,255,255,.9)"
+        source={require('./loader.json')}
+        animationStyle={{
+          width: 100,
+          height: 100,
+        }}
+        speed={1}>
+        <Text
+          style={{
+            fontFamily: 'Poppins-Regular',
+            fontSize: wp(4),
+          }}>
+          Uploading ...
+        </Text>
+      </AnimatedLoader>
       <Text
         style={{
           fontSize: wp(3.5),
@@ -379,11 +446,12 @@ const EachWork = ({token, id, ...props}) => {
             style={{
               backgroundColor: 'white',
               width: wp(100),
-              height: hp(100),
+              height: hp(90),
               borderRadius: 25,
               elevation: 15,
               paddingHorizontal: 20,
               paddingVertical: 15,
+              transform: [{translateY: isExpand ? 50 : 0}],
               borderWidth: 1,
               borderColor: 'rgba(0, 0, 0, 0.08)',
             }}>
@@ -409,28 +477,40 @@ const EachWork = ({token, id, ...props}) => {
               Your work
             </Text>
             {isExpand ? (
-              <View style={{marginBottom: 20}}>
-                {myWorks.map(e => (
-                  <View
-                    style={{
-                      paddingVertical: 5,
-                      paddingHorizontal: 15,
-                      borderRadius: 100,
-                      borderWidth: 1,
-                      borderColor: 'rgba(0, 0, 0, 0.1)',
-                      marginBottom: 5,
-                    }}>
-                    <Text
-                      numberOfLines={1}
+              <View style={{maxHeight: hp(70)}}>
+                <ScrollView style={{marginBottom: 20}}>
+                  {myWorks.map((e, i) => (
+                    <Pressable
                       style={{
-                        fontFamily: 'Poppins-Medium',
-                        color: '#333333',
-                        lineHeight: wp(5),
+                        paddingVertical: 5,
+                        paddingHorizontal: 15,
+                        borderRadius: 100,
+                        borderWidth: 1,
+                        borderColor: 'rgba(0, 0, 0, 0.1)',
+                        marginBottom: 5,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
                       }}>
-                      {e.name}
-                    </Text>
-                  </View>
-                ))}
+                      <Text
+                        numberOfLines={1}
+                        style={{
+                          fontFamily: 'Poppins-Medium',
+                          color: '#333333',
+                          lineHeight: wp(5),
+                          maxWidth: '90%',
+                        }}>
+                        {e.name}
+                      </Text>
+                      <Pressable
+                        onPress={() => {
+                          setMyWorks(myWorks.filter((_, index) => index !== i));
+                        }}>
+                        <Feather name="x" size={18} color="#141414" />
+                      </Pressable>
+                    </Pressable>
+                  ))}
+                </ScrollView>
               </View>
             ) : myWorks.length > 0 ? (
               <View
@@ -456,15 +536,23 @@ const EachWork = ({token, id, ...props}) => {
             ) : null}
             {isExpand ? (
               <View>
-                <AddWorkButton askForFile={askForFile} hollow={true} />
-                <HandInButton handInFunc={handInWork} />
+                {isSubmitted ? (
+                  <>
+                    <UnsubmitButton unsubmitFunc={unsubmitWork} />
+                  </>
+                ) : (
+                  <>
+                    <AddWorkButton askForFile={askForFile} hollow={true} />
+                    <HandInButton handInFunc={handInWork} />
+                  </>
+                )}
               </View>
             ) : (
               <View>
                 {myWorks.length <= 0 ? (
                   <AddWorkButton askForFile={askForFile} />
                 ) : (
-                  <HandInButton  handInFunc={handInWork} />
+                  <HandInButton handInFunc={handInWork} />
                 )}
               </View>
             )}

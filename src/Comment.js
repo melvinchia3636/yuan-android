@@ -234,14 +234,6 @@ const CalendarView = props => {
             })()}
           </View>
         </View>
-        <View style={{marginBottom: 30, marginTop: 10}}>
-          <Text style={styles.homepageSectionHeader}>Today's Lesson</Text>
-          <View style={styles.homepageSectionHeaderSeperator} />
-          <Text style={styles.homepageSectionContent}>English</Text>
-          <Text style={styles.homepageSectionContentSub}>
-            2.00p.m. - 3.00p.m.
-          </Text>
-        </View>
         <View
           style={{
             flexDirection: 'row',
@@ -262,7 +254,7 @@ const CalendarView = props => {
           ) : null}
         </View>
         <View style={{...styles.homepageSectionHeaderSeperator, height: 3}} />
-        <Text style={styles.homepageComment} numberOfLines={1}>
+        <Text style={styles.homepageComment} numberOfLines={4}>
           {comments
             ? comments.filter(
                 e => new Date(e.date).getDate() === choosenDate.getDate(),
