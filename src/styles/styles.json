@@ -215,7 +215,7 @@
 	},
 	"settingsView": {
 		"backgroundColor": "white",
-		"height": 100,
+		"height": 90,
 		"justifyContent": "center",
 		"alignItems": "center"
 	},

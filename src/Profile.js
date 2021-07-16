@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {View, Image, Text, ScrollView} from 'react-native';
 import axios from 'axios';
 
-import SettingsView from './settings';
+import SettingsView from './Settings';
 import Topbar from './Topbar';
 import styles from './styles';
 import {ip} from './constant';

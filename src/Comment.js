@@ -17,7 +17,7 @@ import styles from './styles';
 import axios from 'axios';
 import {widthPercentageToDP as wp} from 'react-native-responsive-screen';
 
-import SettingsView from './settings';
+import SettingsView from './Settings';
 import Topbar from './Topbar';
 import {ip} from './constant';
 

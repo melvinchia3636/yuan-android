@@ -19,7 +19,7 @@ import {ip} from './constant';
 import FeatherIcons from 'react-native-vector-icons/Feather';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
-import SettingsView from './settings';
+import SettingsView from './Settings';
 
 const ChatStack = createStackNavigator();
 

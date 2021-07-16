@@ -10,7 +10,7 @@ import {
 import {ip} from './constant';
 import styles from './styles';
 import Topbar from './Topbar';
-import SettingsView from './settings';
+import SettingsView from './Settings';
 
 import Feather from 'react-native-vector-icons/Feather';
 import Entypo from 'react-native-vector-icons/Entypo';
