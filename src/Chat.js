@@ -19,6 +19,7 @@ import {ip} from './constant';
 import FeatherIcons from 'react-native-vector-icons/Feather';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
+import SettingsView from './settings';
 
 const ChatStack = createStackNavigator();
 
@@ -26,27 +27,44 @@ function ChatView(token, setToken, navprops) {
   const [title, setTitle] = useState('Chat');
   return (
     <>
-      <Topbar title={title} />
       <NavigationContainer>
         <ChatStack.Navigator headerMode="none">
           <ChatStack.Screen name="ChatIndex">
             {props => (
-              <ChatIndex
-                {...props}
-                setTitle={setTitle}
-                token={token}
-                navprops={navprops}
-              />
+              <>
+                <Topbar title={title} {...props} />
+                <ChatIndex
+                  {...props}
+                  setTitle={setTitle}
+                  token={token}
+                  navprops={navprops}
+                />
+              </>
             )}
           </ChatStack.Screen>
           <ChatStack.Screen name="Chat">
             {props => (
-              <Chat
-                {...props}
-                setTitle={setTitle}
-                token={token}
-                navprops={navprops}
-              />
+              <>
+                <Topbar
+                  title={title}
+                  goback={props.navigation.goBack}
+                  {...props}
+                />
+                <Chat
+                  {...props}
+                  setTitle={setTitle}
+                  token={token}
+                  navprops={navprops}
+                />
+              </>
+            )}
+          </ChatStack.Screen>
+          <ChatStack.Screen name="Settings">
+            {props => (
+              <>
+                <Topbar title="Settings" goback={props.navigation.goBack} />
+                <SettingsView {...props} token={token} setToken={setToken} />
+              </>
             )}
           </ChatStack.Screen>
         </ChatStack.Navigator>
@@ -194,7 +212,6 @@ const Chat = ({token, navprops, ...props}) => {
     );
     fetchChat();
     props.navigation.addListener('focus', () => {
-      console.log('yeah');
       fetchChatInterval = setInterval(() => fetchChat(), 3000);
       props.navigation.addListener('blur', payload => {
         try {

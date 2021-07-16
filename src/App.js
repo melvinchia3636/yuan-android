@@ -6,9 +6,7 @@ import {
   Dimensions,
   StatusBar,
   Easing,
-  ScrollView,
   View,
-  Alert,
   Image,
   Text,
   TextInput,
@@ -16,6 +14,7 @@ import {
   Pressable,
 } from 'react-native';
 import axios from 'axios';
+
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import {createAppContainer} from 'react-navigation';
@@ -30,7 +29,7 @@ import CommentView from './Comment';
 import Topbar from './Topbar';
 import ChatView from './Chat';
 import WorkView from './Work';
-import SettingsView from './settings';
+import ProfileView from './Profile.js';
 import {ip} from './constant';
 
 const FadeInView = props => {
@@ -187,89 +186,6 @@ const LoginView = props => {
       </Pressable>
       <DialogBox ref={dialogbox} />
     </View>
-  );
-};
-
-const ProfileView = (token, setToken) => {
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const response = await axios({
-        method: 'GET',
-        url: `http://${ip}/api/v1/user/fetch-user`,
-        headers: {
-          Authorization: 'Token ' + token,
-        },
-      }).catch(async () => {
-        await AsyncStorage.removeItem('@auth_token');
-        setToken(null);
-      });
-      if (response) {
-        setData(response.data);
-      }
-    };
-
-    if (!data) {
-      fetchUserData();
-    }
-  }, [token, data, setToken]);
-
-  return (
-    <>
-      <Topbar title="Home" />
-      <View style={styles.homepageView}>
-        <View style={styles.homepageContentContainer}>
-          <View style={styles.avatarWrapper}>
-            <Image
-              style={styles.avatar}
-              source={{
-                uri: 'http://' + ip + (data ? data.avatar : ''),
-              }}
-            />
-          </View>
-          <Text style={styles.usernameText}>{data ? data.name : ''}</Text>
-          <Text style={styles.roleText}>{data ? data.role : ''}</Text>
-          {data && data.role === 'student' ? (
-            <ScrollView style={{marginBottom: 100}}>
-              <View style={styles.homepageInnerContentContainer}>
-                <Text style={styles.homepageSectionHeader}>Today's Lesson</Text>
-                <View style={styles.homepageSectionHeaderSeperator} />
-                <Text style={styles.homepageSectionContent}>Mathematics</Text>
-                <Text style={styles.homepageSectionContentSub}>
-                  11.00a.m. - 12.00a.m.
-                </Text>
-              </View>
-              <View style={styles.homepageInnerContentContainer}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                  }}>
-                  <Text style={styles.homepageSectionHeader}>
-                    Today's Comment
-                  </Text>
-                  <Text style={{fontFamily: 'Poppins-Medium'}}>View</Text>
-                </View>
-                <View
-                  style={{
-                    ...styles.homepageSectionHeaderSeperator,
-                  }}
-                />
-                <Text style={styles.homepageComment}>
-                  This is the comment for today. This is the comment from your
-                  teacher. The comment can be as long as you want. You can add
-                  ...
-                </Text>
-                <Text style={styles.homepageCommentAuthor}>
-                  - Teacher's Name
-                </Text>
-              </View>
-            </ScrollView>
-          ) : null}
-        </View>
-      </View>
-    </>
   );
 };
 

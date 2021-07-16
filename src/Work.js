@@ -1,25 +1,28 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useState, useEffect, useRef} from 'react';
-import {View, Text, ScrollView, Pressable} from 'react-native';
-import Topbar from './Topbar';
-import SettingsView from './settings';
-import styles from './styles';
+import {View, Text, ScrollView, Pressable, RefreshControl} from 'react-native';
 import axios from 'axios';
-import {ip} from './constant';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {createStackNavigator} from '@react-navigation/stack';
-import {NavigationContainer} from '@react-navigation/native';
+
+import {ip} from './constant';
+import styles from './styles';
+import Topbar from './Topbar';
+import SettingsView from './settings';
+
 import Feather from 'react-native-vector-icons/Feather';
 import Entypo from 'react-native-vector-icons/Entypo';
 
+import {createStackNavigator} from '@react-navigation/stack';
+import {NavigationContainer} from '@react-navigation/native';
+
 import SlidingUpPanel from 'rn-sliding-up-panel';
 import DocumentPicker from 'react-native-document-picker';
+import AnimatedLoader from 'react-native-animated-loader';
 
 const WorkStack = createStackNavigator();
-import AnimatedLoader from 'react-native-animated-loader';
 
 function choose(choices) {
   var index = Math.floor(Math.random() * choices.length);
@@ -55,14 +58,14 @@ function WorkView(token, setToken, navprops, settingsNav) {
                   )}
                 </WorkStack.Screen>
                 <WorkStack.Screen name="EachWork">
-                  {props => (
+                  {propss => (
                     <>
                       <Topbar
                         title="Class Work"
                         goback={props.navigation.goBack}
-                        {...props}
+                        {...propss}
                       />
-                      <EachWork {...props} token={token} />
+                      <EachWork {...propss} token={token} />
                     </>
                   )}
                 </WorkStack.Screen>
@@ -73,7 +76,7 @@ function WorkView(token, setToken, navprops, settingsNav) {
         <WorkStack.Screen name="Settings">
           {props => (
             <>
-              <Topbar title="Settings" goback={props.navigation.goBack}/>
+              <Topbar title="Settings" goback={props.navigation.goBack} />
               <SettingsView {...props} token={token} setToken={setToken} />
             </>
           )}
@@ -95,6 +98,14 @@ const WorkIndex = ({token, ...props}) => {
   };
 
   const [classRooms, setClassRooms] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    fetchClassRooms()
+      .then(res => setClassRooms(res))
+      .then(setRefreshing(false));
+  }, []);
 
   useEffect(() => {
     fetchClassRooms().then(res => setClassRooms(res));
@@ -105,7 +116,14 @@ const WorkIndex = ({token, ...props}) => {
       <ScrollView
         style={{
           margin: 8,
-        }}>
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#e64d00']}
+          />
+        }>
         {classRooms.map(e => (
           <Pressable
             style={{
@@ -141,6 +159,14 @@ const WorkIndex = ({token, ...props}) => {
 const Work = ({token, ...props}) => {
   const classroom = props.route.params.classroom;
   const [classWork, setClassWork] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    fetchClassWorks()
+      .then(res => setClassWork(res))
+      .then(setRefreshing(false));
+  }, []);
 
   const fetchClassWorks = async () => {
     const response = await axios({
@@ -157,10 +183,17 @@ const Work = ({token, ...props}) => {
   }, []);
 
   return (
-    <View
+    <ScrollView
       style={{
         padding: 8,
-      }}>
+      }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={['#e64d00']}
+        />
+      }>
       <View
         style={{
           backgroundColor: classroom.background,
@@ -186,7 +219,7 @@ const Work = ({token, ...props}) => {
       </View>
       <ScrollView
         contentContainerStyle={{
-          justifyContent: classWork.length == 0 ? 'center' : 'flex-start',
+          justifyContent: classWork.length === 0 ? 'center' : 'flex-start',
           minHeight: hp(60),
         }}>
         {classWork.length > 0 ? (
@@ -246,7 +279,7 @@ const Work = ({token, ...props}) => {
           </Text>
         )}
       </ScrollView>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -343,6 +376,15 @@ const EachWork = ({token, id, ...props}) => {
   const slidePanel = useRef();
   const [isLoading, setLoading] = useState(false);
   const [myWorks, setMyWorks] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    fetchWorkDetails()
+      .then(res => setWorkDetails(res))
+      .then(setRefreshing(false));
+  }, []);
+
   const fetchWorkDetails = async () => {
     const response = await axios({
       url: `http://${ip}/api/v1/classroom/fetch-classwork/${props.route.params.id}`,
@@ -413,76 +455,87 @@ const EachWork = ({token, id, ...props}) => {
     fetchWorkDetails().then(res => {
       if (res) {
         setWorkDetails(res);
-        const media = JSON.parse(res.media);
+        const media =
+          typeof res.media === 'string' ? JSON.parse(res.media) : res.media;
         if (media && media.length > 0) {
           setMyWorks(media);
           setSubmitted(true);
         }
       }
     });
+    slidePanel.current.hide();
   }, []);
 
   return (
-    <View
-      style={{
-        backgroundColor: 'white',
-        height: '100%',
-      }}>
-      <AnimatedLoader
-        visible={isLoading}
-        overlayColor="rgba(255,255,255,.9)"
-        source={require('./loader.json')}
-        animationStyle={{
-          width: 100,
-          height: 100,
+    <>
+      <ScrollView
+        style={{
+          backgroundColor: 'white',
         }}
-        speed={1}>
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#e64d00']}
+          />
+        }>
+        <AnimatedLoader
+          visible={isLoading}
+          overlayColor="rgba(255,255,255,.9)"
+          source={require('./loader.json')}
+          animationStyle={{
+            width: 100,
+            height: 100,
+          }}
+          speed={1}>
+          <Text
+            style={{
+              fontFamily: 'Poppins-Regular',
+              fontSize: wp(4),
+            }}>
+            Uploading ...
+          </Text>
+        </AnimatedLoader>
         <Text
           style={{
-            fontFamily: 'Poppins-Regular',
-            fontSize: wp(4),
+            fontSize: wp(3.5),
+            paddingTop: 20,
+            paddingHorizontal: 20,
+            fontFamily: 'Poppins-Medium',
           }}>
-          Uploading ...
+          {workDetails.time
+            ? new Date(workDetails.time).toLocaleString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                hour: 'numeric',
+                minute: 'numeric',
+              })
+            : null}
         </Text>
-      </AnimatedLoader>
-      <Text
-        style={{
-          fontSize: wp(3.5),
-          paddingTop: 20,
-          paddingHorizontal: 20,
-          fontFamily: 'Poppins-Medium',
-        }}>
-        {workDetails.time
-          ? new Date(workDetails.time).toLocaleString('en-GB', {
-              day: 'numeric',
-              month: 'short',
-              hour: 'numeric',
-              minute: 'numeric',
-            })
-          : null}
-      </Text>
-      <Text
-        style={{
-          fontFamily: 'Poppins-Medium',
-          fontSize: wp(6.8),
-          paddingHorizontal: 20,
-          color: '#141414',
-          lineHeight: wp(8),
-          marginBottom: 10,
-        }}>
-        {workDetails.title}
-      </Text>
-      <Text
-        style={{
-          borderTopWidth: 1,
-          marginHorizontal: 20,
-          fontSize: wp(3.5),
-          paddingTop: 20,
-          fontFamily: 'Poppins-Regular',
-          color: '#141414',
-        }}>
-        {workDetails.details}
-      </Text>
+        <Text
+          style={{
+            fontFamily: 'Poppins-Medium',
+            fontSize: wp(6.8),
+            paddingHorizontal: 20,
+            color: '#141414',
+            lineHeight: wp(8),
+            marginBottom: 10,
+          }}>
+          {workDetails.title}
+        </Text>
+        <Text
+          style={{
+            borderTopWidth: 1,
+            marginHorizontal: 20,
+            fontSize: wp(3.5),
+            paddingTop: 20,
+            paddingBottom: hp(24),
+            fontFamily: 'Poppins-Regular',
+            color: '#141414',
+          }}>
+          {workDetails.details}
+        </Text>
+      </ScrollView>
       <SlidingUpPanel
         ref={slidePanel}
         backdropOpacity={0}
@@ -496,8 +549,8 @@ const EachWork = ({token, id, ...props}) => {
         }}
         onBottomReached={() => setExpand(false)}
         draggableRange={{
-          top: hp(90),
-          bottom: myWorks.length > 0 ? hp(35) : hp(30),
+          top: hp(80),
+          bottom: myWorks.length > 0 ? hp(25) : hp(20),
         }}
         friction={0.6}
         allowDragging={false}>
@@ -633,7 +686,7 @@ const EachWork = ({token, id, ...props}) => {
           </View>
         </View>
       </SlidingUpPanel>
-    </View>
+    </>
   );
 };
 

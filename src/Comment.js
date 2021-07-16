@@ -17,6 +17,7 @@ import styles from './styles';
 import axios from 'axios';
 import {widthPercentageToDP as wp} from 'react-native-responsive-screen';
 
+import SettingsView from './settings';
 import Topbar from './Topbar';
 import {ip} from './constant';
 
@@ -38,7 +39,7 @@ const getComments = async (date, token) => {
 
 const CommentStack = createStackNavigator();
 
-function CommentView(token) {
+function CommentView(token, setToken) {
   const [title, setTitle] = useState('Comment');
   return (
     <>
@@ -47,7 +48,7 @@ function CommentView(token) {
           <CommentStack.Screen name="Calendar">
             {props => (
               <>
-                <Topbar title="Comment" />
+                <Topbar title="Comment" {...props} />
                 <CalendarView {...props} setTitle={setTitle} token={token} />
               </>
             )}
@@ -55,8 +56,20 @@ function CommentView(token) {
           <CommentStack.Screen name="EachComment">
             {props => (
               <>
-                <Topbar title={title} goback={props.navigation.goBack} />
+                <Topbar
+                  title={title}
+                  goback={props.navigation.goBack}
+                  {...props}
+                />
                 <EachCommentView {...props} setTitle={setTitle} token={token} />
+              </>
+            )}
+          </CommentStack.Screen>
+          <CommentStack.Screen name="Settings">
+            {props => (
+              <>
+                <Topbar title="Settings" goback={props.navigation.goBack} />
+                <SettingsView {...props} token={token} setToken={setToken} />
               </>
             )}
           </CommentStack.Screen>
