@@ -9,7 +9,7 @@ import {
 
 import styles from './styles';
 
-const Topbar = ({title, goback, ...props}) => {
+const Topbar = ({title, goback, navSettings, ...props}) => {
   return (
     <View style={{...styles.topbar, zIndex: 9999}}>
       {goback ? (
@@ -30,9 +30,13 @@ const Topbar = ({title, goback, ...props}) => {
         style={{color: 'white'}}
         name="cog-outline"
         size={wp(7)}
-        onPress={() => {
-          Alert.alert('Facebook Button Clicked');
-        }}
+        onPress={
+          props.navigation
+            ? () => props.navigation.navigate('Settings')
+            : () => {
+                Alert.alert('Facebook Button Clicked');
+              }
+        }
       />
     </View>
   );

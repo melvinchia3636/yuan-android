@@ -1,7 +1,8 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {View, Text, ScrollView, Pressable} from 'react-native';
 import Topbar from './Topbar';
+import SettingsView from './settings';
 import styles from './styles';
 import axios from 'axios';
 import {ip} from './constant';
@@ -14,11 +15,10 @@ import {NavigationContainer} from '@react-navigation/native';
 import Feather from 'react-native-vector-icons/Feather';
 import Entypo from 'react-native-vector-icons/Entypo';
 
-import SlidingPanel from 'react-native-sliding-up-down-panels';
+import SlidingUpPanel from 'rn-sliding-up-panel';
 import DocumentPicker from 'react-native-document-picker';
 
 const WorkStack = createStackNavigator();
-const EachWorkStack = createStackNavigator();
 import AnimatedLoader from 'react-native-animated-loader';
 
 function choose(choices) {
@@ -26,52 +26,60 @@ function choose(choices) {
   return choices[index];
 }
 
-function WorkView(token, setToken, navprops) {
+function WorkView(token, setToken, navprops, settingsNav) {
   return (
-    <>
-      <NavigationContainer>
-        <WorkStack.Navigator headerMode="none">
-          <WorkStack.Screen name="WorkIndex">
-            {props => (
-              <>
-                <Topbar title="Work" />
-                <WorkIndex {...props} token={token} />
-              </>
-            )}
-          </WorkStack.Screen>
-          <WorkStack.Screen name="Work">
-            {props => (
-              <>
-                <WorkStack.Navigator headerMode="none">
-                  <WorkStack.Screen name="WorkView">
-                    {() => (
-                      <>
-                        <Topbar
-                          title="Classroom"
-                          goback={props.navigation.goBack}
-                        />
-                        <Work {...props} token={token} />
-                      </>
-                    )}
-                  </WorkStack.Screen>
-                  <WorkStack.Screen name="EachWork">
-                    {props => (
-                      <>
-                        <Topbar
-                          title="Class Work"
-                          goback={props.navigation.goBack}
-                        />
-                        <EachWork {...props} token={token} />
-                      </>
-                    )}
-                  </WorkStack.Screen>
-                </WorkStack.Navigator>
-              </>
-            )}
-          </WorkStack.Screen>
-        </WorkStack.Navigator>
-      </NavigationContainer>
-    </>
+    <NavigationContainer>
+      <WorkStack.Navigator headerMode="none">
+        <WorkStack.Screen name="WorkIndex">
+          {props => (
+            <>
+              <Topbar title="Work" {...props} />
+              <WorkIndex {...props} token={token} />
+            </>
+          )}
+        </WorkStack.Screen>
+        <WorkStack.Screen name="Work">
+          {props => (
+            <>
+              <WorkStack.Navigator headerMode="none">
+                <WorkStack.Screen name="WorkView">
+                  {() => (
+                    <>
+                      <Topbar
+                        title="Classroom"
+                        goback={props.navigation.goBack}
+                        {...props}
+                      />
+                      <Work {...props} token={token} />
+                    </>
+                  )}
+                </WorkStack.Screen>
+                <WorkStack.Screen name="EachWork">
+                  {props => (
+                    <>
+                      <Topbar
+                        title="Class Work"
+                        goback={props.navigation.goBack}
+                        {...props}
+                      />
+                      <EachWork {...props} token={token} />
+                    </>
+                  )}
+                </WorkStack.Screen>
+              </WorkStack.Navigator>
+            </>
+          )}
+        </WorkStack.Screen>
+        <WorkStack.Screen name="Settings">
+          {props => (
+            <>
+              <Topbar title="Settings" goback={props.navigation.goBack}/>
+              <SettingsView {...props} token={token} setToken={setToken} />
+            </>
+          )}
+        </WorkStack.Screen>
+      </WorkStack.Navigator>
+    </NavigationContainer>
   );
 }
 
@@ -149,9 +157,9 @@ const Work = ({token, ...props}) => {
   }, []);
 
   return (
-    <ScrollView
+    <View
       style={{
-        margin: 8,
+        padding: 8,
       }}>
       <View
         style={{
@@ -176,51 +184,69 @@ const Work = ({token, ...props}) => {
           {classroom.admin_username}
         </Text>
       </View>
-      {classWork.map(e => (
-        <Pressable
-          key={e.id}
-          style={{
-            backgroundColor: 'white',
-            padding: 16,
-            marginVertical: 4,
-            borderRadius: 8,
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}
-          onPress={() => props.navigation.navigate('EachWork', {id: e.id})}>
-          <Feather
-            name={choose(['paperclip', 'clipboard'])}
-            size={32}
-            color="#999999"
-            style={{marginRight: 16}}
-          />
-          <View>
-            <Text
+      <ScrollView
+        contentContainerStyle={{
+          justifyContent: classWork.length == 0 ? 'center' : 'flex-start',
+          minHeight: hp(60),
+        }}>
+        {classWork.length > 0 ? (
+          classWork.map(e => (
+            <Pressable
+              key={e.id}
               style={{
-                fontFamily: 'Poppins-Medium',
-                fontSize: wp(4),
-                width: wp(76),
-                color: '#666666',
+                backgroundColor: 'white',
+                padding: 16,
+                marginVertical: 4,
+                borderRadius: 8,
+                flexDirection: 'row',
+                alignItems: 'center',
               }}
-              numberOfLines={1}>
-              {e.title}
-            </Text>
-            <Text
-              style={{
-                color: '#666666',
-                fontFamily: 'Poppins-Regular',
-                fontSize: wp(3),
-              }}>
-              {new Date(e.time).toLocaleString('en-GB', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              })}
-            </Text>
-          </View>
-        </Pressable>
-      ))}
-    </ScrollView>
+              onPress={() => props.navigation.navigate('EachWork', {id: e.id})}>
+              <Feather
+                name={choose(['paperclip', 'clipboard'])}
+                size={32}
+                color="#999999"
+                style={{marginRight: 16}}
+              />
+              <View>
+                <Text
+                  style={{
+                    fontFamily: 'Poppins-Medium',
+                    fontSize: wp(4),
+                    width: wp(76),
+                    color: '#666666',
+                  }}
+                  numberOfLines={1}>
+                  {e.title}
+                </Text>
+                <Text
+                  style={{
+                    color: '#666666',
+                    fontFamily: 'Poppins-Regular',
+                    fontSize: wp(3),
+                  }}>
+                  {new Date(e.time).toLocaleString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
+                </Text>
+              </View>
+            </Pressable>
+          ))
+        ) : (
+          <Text
+            style={{
+              textAlign: 'center',
+              fontFamily: 'Poppins-Regular',
+              fontSize: wp(5),
+              color: '#999999',
+            }}>
+            Nothing Here
+          </Text>
+        )}
+      </ScrollView>
+    </View>
   );
 };
 
@@ -314,6 +340,7 @@ const EachWork = ({token, id, ...props}) => {
   const [workDetails, setWorkDetails] = useState({});
   const [isExpand, setExpand] = useState(false);
   const [isSubmitted, setSubmitted] = useState(false);
+  const slidePanel = useRef();
   const [isLoading, setLoading] = useState(false);
   const [myWorks, setMyWorks] = useState([]);
   const fetchWorkDetails = async () => {
@@ -333,8 +360,8 @@ const EachWork = ({token, id, ...props}) => {
       });
       const work = [];
       for (let res of ress) {
-        if (!myWorks.map(e => e.name).includes(res.name)) {
-          work.push(res);
+        if (!myWorks.map(e => e.content.name).includes(res.name)) {
+          work.push({type: 'new', content: res});
         }
       }
       setMyWorks(myWorks.concat(work));
@@ -348,7 +375,9 @@ const EachWork = ({token, id, ...props}) => {
 
   const handInWork = () => {
     const body = new FormData();
-    myWorks.forEach(item => body.append('file[]', item));
+    const works = myWorks.filter(e => e.type === 'new');
+
+    works.forEach(item => body.append('file[]', item.content));
     setLoading(true);
 
     fetch(`http://${ip}/api/v1/classroom/upload/${props.route.params.id}`, {
@@ -356,7 +385,7 @@ const EachWork = ({token, id, ...props}) => {
         authorization: 'Token ' + token,
       },
       method: 'POST',
-      body,
+      body: works.length > 0 ? body : null,
     })
       .then(res => {
         setSubmitted(true);
@@ -366,11 +395,31 @@ const EachWork = ({token, id, ...props}) => {
   };
 
   const unsubmitWork = () => {
-    setSubmitted(false);
+    axios({
+      url: `http://${ip}/api/v1/classroom/unsubmit/${props.route.params.id}`,
+      headers: {
+        authorization: 'Token ' + token,
+      },
+      method: 'POST',
+    })
+      .then(() => {
+        setSubmitted(false);
+        setMyWorks([]);
+      })
+      .catch(err => console.log(err));
   };
 
   useEffect(() => {
-    fetchWorkDetails().then(res => setWorkDetails(res));
+    fetchWorkDetails().then(res => {
+      if (res) {
+        setWorkDetails(res);
+        const media = JSON.parse(res.media);
+        if (media && media.length > 0) {
+          setMyWorks(media);
+          setSubmitted(true);
+        }
+      }
+    });
   }, []);
 
   return (
@@ -434,14 +483,25 @@ const EachWork = ({token, id, ...props}) => {
         }}>
         {workDetails.details}
       </Text>
-      <SlidingPanel
-        headerLayoutHeight={wp(myWorks.length > 0 ? 70 : 55)}
-        AnimationSpeed={300}
-        allowDragging={false}
-        onAnimationStart={() => {
-          setExpand(!isExpand);
+      <SlidingUpPanel
+        ref={slidePanel}
+        backdropOpacity={0}
+        onDragStart={position => {
+          if (position > hp(30)) {
+            setExpand(true);
+          }
+          if (position < hp(60)) {
+            setExpand(false);
+          }
         }}
-        headerLayout={() => (
+        onBottomReached={() => setExpand(false)}
+        draggableRange={{
+          top: hp(90),
+          bottom: myWorks.length > 0 ? hp(35) : hp(30),
+        }}
+        friction={0.6}
+        allowDragging={false}>
+        <View style={styles.container}>
           <View
             style={{
               backgroundColor: 'white',
@@ -451,14 +511,20 @@ const EachWork = ({token, id, ...props}) => {
               elevation: 15,
               paddingHorizontal: 20,
               paddingVertical: 15,
-              transform: [{translateY: isExpand ? 50 : 0}],
               borderWidth: 1,
               borderColor: 'rgba(0, 0, 0, 0.08)',
             }}>
-            <View
+            <Pressable
               style={{
                 width: '100%',
                 alignItems: 'center',
+                paddingVertical: 10,
+              }}
+              onPress={() => {
+                !isExpand
+                  ? slidePanel.current.show()
+                  : slidePanel.current.hide();
+                setExpand(true);
               }}>
               <Entypo
                 name={`chevron-${isExpand ? 'down' : 'up'}`}
@@ -466,7 +532,7 @@ const EachWork = ({token, id, ...props}) => {
                 color="#999999"
                 width={100}
               />
-            </View>
+            </Pressable>
             <Text
               style={{
                 color: '#141414',
@@ -477,7 +543,7 @@ const EachWork = ({token, id, ...props}) => {
               Your work
             </Text>
             {isExpand ? (
-              <View style={{maxHeight: hp(70)}}>
+              <View style={{maxHeight: hp(55)}}>
                 <ScrollView style={{marginBottom: 20}}>
                   {myWorks.map((e, i) => (
                     <Pressable
@@ -500,14 +566,18 @@ const EachWork = ({token, id, ...props}) => {
                           lineHeight: wp(5),
                           maxWidth: '90%',
                         }}>
-                        {e.name}
+                        {e.content.name}
                       </Text>
-                      <Pressable
-                        onPress={() => {
-                          setMyWorks(myWorks.filter((_, index) => index !== i));
-                        }}>
-                        <Feather name="x" size={18} color="#141414" />
-                      </Pressable>
+                      {!isSubmitted ? (
+                        <Pressable
+                          onPress={() => {
+                            setMyWorks(
+                              myWorks.filter((_, index) => index !== i),
+                            );
+                          }}>
+                          <Feather name="x" size={18} color="#141414" />
+                        </Pressable>
+                      ) : null}
                     </Pressable>
                   ))}
                 </ScrollView>
@@ -529,7 +599,7 @@ const EachWork = ({token, id, ...props}) => {
                     color: '#333333',
                   }}>
                   {myWorks.length === 1
-                    ? myWorks[0].name
+                    ? myWorks[0].content.name
                     : myWorks.length + ' attachments'}
                 </Text>
               </View>
@@ -549,17 +619,20 @@ const EachWork = ({token, id, ...props}) => {
               </View>
             ) : (
               <View>
-                {myWorks.length <= 0 ? (
-                  <AddWorkButton askForFile={askForFile} />
+                {!isSubmitted ? (
+                  myWorks.length <= 0 ? (
+                    <AddWorkButton askForFile={askForFile} />
+                  ) : (
+                    <HandInButton handInFunc={handInWork} />
+                  )
                 ) : (
-                  <HandInButton handInFunc={handInWork} />
+                  <UnsubmitButton unsubmitFunc={unsubmitWork} />
                 )}
               </View>
             )}
           </View>
-        )}
-        allowAnimation={true}
-      />
+        </View>
+      </SlidingUpPanel>
     </View>
   );
 };
