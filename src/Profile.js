@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {View, Image, Text, ScrollView} from 'react-native';
+import {View, Image, Text, ScrollView, Pressable} from 'react-native';
 import axios from 'axios';
 
 import SettingsView from './Settings';
@@ -14,7 +14,7 @@ import {NavigationContainer} from '@react-navigation/native';
 
 const ProfileStack = createStackNavigator();
 
-const ProfileView = (token, setToken) => {
+const ProfileView = (token, setToken, navprops) => {
   return (
     <NavigationContainer>
       <ProfileStack.Navigator headerMode={false}>
@@ -22,7 +22,12 @@ const ProfileView = (token, setToken) => {
           {props => (
             <>
               <Topbar title="Home" {...props} />
-              <MainProfileView token={token} setToken={setToken} {...props} />
+              <MainProfileView
+                token={token}
+                setToken={setToken}
+                navprops={navprops}
+                {...props}
+              />
             </>
           )}
         </ProfileStack.Screen>
@@ -39,7 +44,7 @@ const ProfileView = (token, setToken) => {
   );
 };
 
-const MainProfileView = ({token, setToken, ...props}) => {
+const MainProfileView = ({token, setToken, navprops, ...props}) => {
   const [data, setData] = useState(null);
 
   useEffect(() => {
@@ -79,7 +84,7 @@ const MainProfileView = ({token, setToken, ...props}) => {
           <Text style={styles.usernameText}>{data ? data.name : ''}</Text>
           <Text style={styles.roleText}>{data ? data.role : ''}</Text>
           {data && data.role === 'student' ? (
-            <ScrollView style={{marginBottom: 100}}>
+            <ScrollView style={{marginBottom: 140}}>
               <View style={styles.homepageInnerContentContainer}>
                 <Text style={styles.homepageSectionHeader}>Today's Lesson</Text>
                 <View style={styles.homepageSectionHeaderSeperator} />
@@ -93,25 +98,33 @@ const MainProfileView = ({token, setToken, ...props}) => {
                   style={{
                     flexDirection: 'row',
                     justifyContent: 'space-between',
+                    alignItems: 'center',
                   }}>
                   <Text style={styles.homepageSectionHeader}>
                     Today's Comment
                   </Text>
-                  <Text style={{fontFamily: 'Poppins-Medium'}}>View</Text>
                 </View>
                 <View
                   style={{
                     ...styles.homepageSectionHeaderSeperator,
                   }}
                 />
-                <Text style={styles.homepageComment}>
-                  This is the comment for today. This is the comment from your
-                  teacher. The comment can be as long as you want. You can add
-                  ...
+                <Text style={styles.homepageComment} numberOfLines={2}>
+                  {data.comment
+                    ? data.comment.content
+                    : 'No comment for today.'}
                 </Text>
-                <Text style={styles.homepageCommentAuthor}>
-                  - Teacher's Name
-                </Text>
+                {data.comment ? (
+                  <>
+                    <Text style={styles.homepageCommentAuthor}>
+                      - {data.comment.author}
+                    </Text>
+                    <Pressable
+                      onPress={() => navprops.navigation.navigate('Comment')}>
+                      <Text style={styles.viewCommentBtn}>View Comment</Text>
+                    </Pressable>
+                  </>
+                ) : null}
               </View>
             </ScrollView>
           ) : null}

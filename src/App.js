@@ -12,6 +12,7 @@ import {
   TextInput,
   Keyboard,
   Pressable,
+  Linking
 } from 'react-native';
 import axios from 'axios';
 
@@ -131,7 +132,6 @@ const LoginView = props => {
           password: password,
         },
       }).catch(e => {
-        console.log(e);
         dialogbox.current.tip({
           title: 'Login Failed',
           content:
@@ -152,6 +152,10 @@ const LoginView = props => {
     };
     fetchToken();
   };
+
+  const changePassword = () => {
+    Linking.openURL(`http://${ip}/password-reset/`)
+  }
 
   return (
     <View
@@ -178,7 +182,7 @@ const LoginView = props => {
         value={password}
         onChangeText={onChangePassword}
       />
-      <Pressable style={styles.fpBtn}>
+      <Pressable style={styles.fpBtn} onPress={changePassword}>
         <Text style={styles.fpBtnText}>Forgot password?</Text>
       </Pressable>
       <Pressable style={styles.loginBtn} onPress={checkCredentials}>

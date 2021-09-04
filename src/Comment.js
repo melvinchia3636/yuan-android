@@ -247,44 +247,17 @@ const CalendarView = props => {
             })()}
           </View>
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-          }}>
-          <Text style={styles.homepageSectionHeader}>Today's Comment</Text>
-          {comments?.filter(
-            e => new Date(e.date).getDate() === choosenDate.getDate(),
-          )[0] ? (
-            <Pressable
-              onPress={() =>
-                props.navigation.navigate('EachComment', {
-                  choosenDate: choosenDate.toDateString(),
-                })
-              }>
-              <Text style={styles.viewCommentBtn}>View</Text>
-            </Pressable>
-          ) : null}
-        </View>
-        <View style={{...styles.homepageSectionHeaderSeperator, height: 3}} />
-        <Text style={styles.homepageComment} numberOfLines={4}>
-          {comments
-            ? comments.filter(
-                e => new Date(e.date).getDate() === choosenDate.getDate(),
-              )[0]?.content
-            : ''}
-        </Text>
         {comments?.filter(
           e => new Date(e.date).getDate() === choosenDate.getDate(),
         )[0] ? (
-          <Text style={{...styles.homepageCommentAuthor, marginTop: 3}}>
-            -{' '}
-            {comments
-              ? comments.filter(
-                  e => new Date(e.date).getDate() === choosenDate.getDate(),
-                )[0]?.author_name
-              : ''}
-          </Text>
+          <Pressable
+            onPress={() =>
+              props.navigation.navigate('EachComment', {
+                choosenDate: choosenDate.toDateString(),
+              })
+            }>
+            <Text style={styles.viewCommentBtn}>View Comment</Text>
+          </Pressable>
         ) : null}
       </View>
     </>

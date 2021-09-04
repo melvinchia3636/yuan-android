@@ -27,8 +27,8 @@ const Topbar = ({title, goback, navSettings, ...props}) => {
       ) : null}
       <Text style={styles.topbarTitle}>{title}</Text>
       <Icon
-        style={{color: 'white'}}
-        name="cog-outline"
+        style={{color: 'white', width: wp(7)}}
+        name={title == 'Settings' ? '' : 'cog-outline'}
         size={wp(7)}
         onPress={
           props.navigation
