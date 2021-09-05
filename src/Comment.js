@@ -48,7 +48,7 @@ function CommentView(token, setToken) {
           <CommentStack.Screen name="Calendar">
             {props => (
               <>
-                <Topbar title="Comment" {...props} />
+                <Topbar title="Comment" />
                 <CalendarView {...props} setTitle={setTitle} token={token} />
               </>
             )}
@@ -56,11 +56,7 @@ function CommentView(token, setToken) {
           <CommentStack.Screen name="EachComment">
             {props => (
               <>
-                <Topbar
-                  title={title}
-                  goback={props.navigation.goBack}
-                  {...props}
-                />
+                <Topbar title={title} goback={props.navigation.goBack} />
                 <EachCommentView {...props} setTitle={setTitle} token={token} />
               </>
             )}

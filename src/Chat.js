@@ -32,8 +32,24 @@ function ChatView(token, setToken, navprops) {
           <ChatStack.Screen name="ChatIndex">
             {props => (
               <>
-                <Topbar title={title} {...props} />
+                <Topbar
+                  title={title}
+                  plusContact={() => props.navigation.navigate('AddContact')}
+                />
                 <ChatIndex
+                  {...props}
+                  setTitle={setTitle}
+                  token={token}
+                  navprops={navprops}
+                />
+              </>
+            )}
+          </ChatStack.Screen>
+          <ChatStack.Screen name="AddContact">
+            {props => (
+              <>
+                <Topbar title="Add Contact" goback={props.navigation.goBack} />
+                <AddContact
                   {...props}
                   setTitle={setTitle}
                   token={token}
@@ -45,11 +61,7 @@ function ChatView(token, setToken, navprops) {
           <ChatStack.Screen name="Chat">
             {props => (
               <>
-                <Topbar
-                  title={title}
-                  goback={props.navigation.goBack}
-                  {...props}
-                />
+                <Topbar title={title} goback={props.navigation.goBack} />
                 <Chat
                   {...props}
                   setTitle={setTitle}
@@ -86,6 +98,10 @@ const ChatIndex = props => {
   };
   useEffect(() => {
     fetchChatRoom();
+
+    props.navigation.addListener('focus', () => {
+      fetchChatRoom();
+    });
   }, []);
 
   return (
@@ -373,6 +389,87 @@ const Chat = ({token, navprops, ...props}) => {
           </Pressable>
         </View>
       </View>
+    </>
+  );
+};
+
+const AddContact = ({token, ...props}) => {
+  const [contacts, setContacts] = useState([]);
+
+  useEffect(() => {
+    axios({
+      url: `http://${ip}/api/v1/chat/fetch-contacts`,
+      method: 'GET',
+      headers: {
+        Authorization: 'Token ' + token,
+      },
+    })
+      .then(r => setContacts(r.data))
+      .catch(err => err);
+  }, []);
+
+  const createContact = id => {
+    axios({
+      url: `http://${ip}/api/v1/chat/create-contact/${id}`,
+      method: 'POST',
+      headers: {
+        Authorization: 'Token ' + token,
+      },
+    })
+      .then(r => {
+        props.navigation.navigate('Chat', {room_id: r.data});
+      })
+      .catch(err => err);
+  };
+
+  return (
+    <>
+      {contacts.map(e => (
+        <Pressable
+          key={e.id}
+          style={{
+            flexDirection: 'row',
+            paddingHorizontal: wp(4),
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backgroundColor: 'white',
+            elevation: 5,
+          }}
+          onPress={() => createContact(e.id)}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: wp(4),
+              borderBottomColor: '#F5F5F5',
+              borderBottomWidth: 1.8,
+              width: '100%',
+            }}>
+            <Image
+              style={{
+                width: wp(12),
+                height: wp(12),
+                borderRadius: 100,
+                marginRight: 10,
+              }}
+              source={{
+                uri: 'http://' + ip + e.avatar,
+              }}
+            />
+            <View>
+              <Text
+                style={{
+                  fontSize: wp(4),
+                  color: '#141414',
+                  marginTop: 3,
+                  fontFamily: 'Poppins-Medium',
+                }}>
+                {e.username}
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+      ))}
     </>
   );
 };

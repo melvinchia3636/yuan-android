@@ -33,13 +33,6 @@ const SettingsView = ({token, setToken}) => {
   return (
     <>
       <View style={styles.settingsView}>
-        <Text
-          style={{
-            fontFamily: 'Poppins-Medium',
-            fontSize: 24,
-          }}>
-          Settings
-        </Text>
         <Pressable
           style={{
             borderRadius: 60,

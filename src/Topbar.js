@@ -26,18 +26,27 @@ const Topbar = ({title, goback, navSettings, ...props}) => {
         </Pressable>
       ) : null}
       <Text style={styles.topbarTitle}>{title}</Text>
-      <Icon
-        style={{color: 'white', width: wp(7)}}
-        name={title == 'Settings' ? '' : 'cog-outline'}
-        size={wp(7)}
-        onPress={
-          props.navigation
-            ? () => props.navigation.navigate('Settings')
-            : () => {
-                Alert.alert('Facebook Button Clicked');
-              }
-        }
-      />
+      {!props.plusContact ? (
+        <Icon
+          style={{color: 'white', width: wp(7)}}
+          name={
+            title === 'Settings' || !props.navigation ? null : 'cog-outline'
+          }
+          size={wp(7)}
+          onPress={
+            props.navigation
+              ? () => props.navigation.navigate('Settings')
+              : () => {}
+          }
+        />
+      ) : (
+        <Icon
+          style={{color: 'white', width: wp(7)}}
+          name="message-plus-outline"
+          size={wp(7)}
+          onPress={props.plusContact}
+        />
+      )}
     </View>
   );
 };
