@@ -83,17 +83,32 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
           </View>
           <Text style={styles.usernameText}>{data ? data.name : ''}</Text>
           <Text style={styles.roleText}>{data ? data.role : ''}</Text>
-          {data && data.role === 'student' ? (
-            <ScrollView style={{marginBottom: 140}}>
-              <View style={styles.homepageInnerContentContainer}>
-                <Text style={styles.homepageSectionHeader}>Today's Lesson</Text>
-                <View style={styles.homepageSectionHeaderSeperator} />
-                <Text style={styles.homepageSectionContent}>Mathematics</Text>
-                <Text style={styles.homepageSectionContentSub}>
-                  11.00a.m. - 12.00a.m.
-                </Text>
-              </View>
-              <View style={styles.homepageInnerContentContainer}>
+
+          <ScrollView style={{marginBottom: 140}}>
+            <View style={styles.homepageInnerContentContainer}>
+              <Text style={styles.homepageSectionHeader}>Today's Event</Text>
+              <View style={styles.homepageSectionHeaderSeperator} />
+              {data && data.event.length ? (
+                data.event.map(e => (
+                  <View style={{marginBottom: 30}}>
+                    <Text style={styles.homepageSectionContent}>
+                      {e.class_name}
+                    </Text>
+                    <Text style={styles.homepageSectionContentSub}>
+                      {e.start} - {e.end}
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.homepageComment}>No event for today.</Text>
+              )}
+            </View>
+            {data && data.role === 'student' ? (
+              <View
+                style={{
+                  ...styles.homepageInnerContentContainer,
+                  marginTop: -8,
+                }}>
                 <View
                   style={{
                     flexDirection: 'row',
@@ -126,8 +141,8 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
                   </>
                 ) : null}
               </View>
-            </ScrollView>
-          ) : null}
+            ) : null}
+          </ScrollView>
         </View>
       </View>
     </>
