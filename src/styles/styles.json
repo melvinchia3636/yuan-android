@@ -216,7 +216,8 @@
 	"settingsView": {
 		"backgroundColor": "white",
 		"height": 90,
-		"justifyContent": "center",
+		"paddingBottom": 100,
+		"justifyContent": "flex-end",
 		"alignItems": "center"
 	},
 	"chatButton": {

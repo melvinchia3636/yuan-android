@@ -193,29 +193,11 @@ const LoginView = props => {
   );
 };
 
-const PaymentView = () => {
-  return (
-    <>
-      <Topbar title="Payment" />
-      <View style={styles.settingsView}>
-        <Text
-          style={{
-            fontFamily: 'Poppins-Medium',
-            fontSize: 24,
-          }}>
-          Payment
-        </Text>
-      </View>
-    </>
-  );
-};
-
 const TabNav = [
   ['Profile', ProfileView, 'account-outline'],
   ['Work', WorkView, 'notebook-outline'],
   ['Comment', CommentView, 'comment-quote-outline'],
   ['Chat', ChatView, 'comment-text-multiple-outline'],
-  ['Payment', PaymentView, 'credit-card-outline'],
 ];
 
 const bottomTabNavigator = (token, setToken) =>

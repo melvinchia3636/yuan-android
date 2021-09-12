@@ -112,6 +112,7 @@ const ChatIndex = props => {
           style={{
             flexDirection: 'row',
             padding: wp(4),
+            marginBottom: 1,
             alignItems: 'center',
             justifyContent: 'space-between',
             backgroundColor: 'white',
@@ -123,21 +124,23 @@ const ChatIndex = props => {
               flexDirection: 'row',
               alignItems: 'center',
             }}>
-            <Image
-              style={{
-                width: wp(12),
-                height: wp(12),
-                borderRadius: 100,
-                marginRight: 10,
-              }}
-              source={{
-                uri: 'http://' + ip + e.target[0].avatar,
-              }}
-            />
+            <View style={{elevation: 3}}>
+              <Image
+                style={{
+                  width: wp(12),
+                  height: wp(12),
+                  borderRadius: 100,
+                  marginRight: 10,
+                }}
+                source={{
+                  uri: 'http://' + ip + e.target[0].avatar,
+                }}
+              />
+            </View>
             <View>
               <Text
                 style={{
-                  fontSize: wp(4),
+                  fontSize: wp(4.4),
                   marginTop: 3,
                   fontFamily: 'Poppins-Medium',
                 }}>
@@ -148,7 +151,7 @@ const ChatIndex = props => {
                   fontFamily: 'Poppins-Regular',
                   color: '#666666',
                   marginTop: -3,
-                  fontSize: wp(3.5),
+                  fontSize: wp(3.2),
                   maxWidth: wp(60),
                 }}
                 ellipsizeMode="tail"

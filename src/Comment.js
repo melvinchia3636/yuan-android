@@ -78,6 +78,7 @@ function CommentView(token, setToken) {
 const CalendarView = props => {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [choosenDate, setChoosenDate] = useState(new Date());
+  const [event, setEvent] = useState([]);
   React.useEffect(() => {
     getComments(new Date(new Date().getFullYear(), month, 1), props.token).then(
       r => setComments(r),
@@ -85,9 +86,22 @@ const CalendarView = props => {
   }, [month, props.token]);
   const [comments, setComments] = useState(null);
 
+  const fetchEvent = date => {
+    const day = date.getDay() - 1 >= 0 ? date.getDay() - 1 : 6;
+    axios({
+      url: `http://${ip}/api/v1/events/fetch-event/${day}`,
+      method: 'GET',
+      headers: {
+        Authorization: 'Token ' + props.token,
+      },
+    })
+      .then(e => setEvent(e.data))
+      .catch(err => console.log(err));
+  };
+
   return (
     <>
-      <View style={styles.commentView}>
+      <ScrollView style={styles.commentView}>
         <View style={styles.monthContainer}>
           <Pressable style={{padding: 15}} onPress={() => setMonth(month - 1)}>
             <Ionicons
@@ -197,6 +211,13 @@ const CalendarView = props => {
                                   parseInt(element.children, 10),
                                 ),
                               );
+                              fetchEvent(
+                                new Date(
+                                  new Date().getFullYear(),
+                                  month - 1,
+                                  parseInt(element.children, 10),
+                                ),
+                              );
                             }
                           }}>
                           <Text
@@ -255,7 +276,35 @@ const CalendarView = props => {
             <Text style={styles.viewCommentBtn}>View Comment</Text>
           </Pressable>
         ) : null}
-      </View>
+        <View
+          style={{
+            marginBottom: 20,
+          }}>
+          {event.map(e => (
+            <View
+              style={{
+                marginBottom: 10,
+                marginTop: 20,
+              }}>
+              <Text
+                style={{
+                  fontFamily: 'Poppins-Medium',
+                  fontSize: wp(6),
+                }}>
+                {e.start} - {e.end}
+              </Text>
+              <Text
+                style={{
+                  fontFamily: 'Poppins-Medium',
+                  fontSize: wp(4),
+                  color: '#141414',
+                }}>
+                {e.class_name}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
     </>
   );
 };
