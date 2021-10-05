@@ -215,9 +215,11 @@
 	},
 	"settingsView": {
 		"backgroundColor": "white",
+		"paddingHorizontal": 25,
+		"paddingVertical": 20,
 		"height": 90,
 		"paddingBottom": 100,
-		"justifyContent": "flex-end",
+		"justifyContent": "space-between",
 		"alignItems": "center"
 	},
 	"chatButton": {

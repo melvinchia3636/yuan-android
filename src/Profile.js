@@ -12,16 +12,19 @@ import {ip} from './constant';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
 
+import {useTranslation} from 'react-i18next';
+
 const ProfileStack = createStackNavigator();
 
 const ProfileView = (token, setToken, navprops) => {
+  const {t, i18n} = useTranslation();
   return (
     <NavigationContainer>
       <ProfileStack.Navigator headerMode={false}>
         <ProfileStack.Screen name="Profile">
           {props => (
             <>
-              <Topbar title="Home" {...props} />
+              <Topbar title={'Home'} {...props} />
               <MainProfileView
                 token={token}
                 setToken={setToken}
@@ -46,6 +49,7 @@ const ProfileView = (token, setToken, navprops) => {
 
 const MainProfileView = ({token, setToken, navprops, ...props}) => {
   const [data, setData] = useState(null);
+  const {t, i18n} = useTranslation();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -86,7 +90,9 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
 
           <ScrollView style={{marginBottom: 140}}>
             <View style={styles.homepageInnerContentContainer}>
-              <Text style={styles.homepageSectionHeader}>Today's Event</Text>
+              <Text style={styles.homepageSectionHeader}>
+                {t('common:hello')}
+              </Text>
               <View style={styles.homepageSectionHeaderSeperator} />
               {data && data.event.length ? (
                 data.event.map(e => (
@@ -100,7 +106,9 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
                   </View>
                 ))
               ) : (
-                <Text style={styles.homepageComment}>No event for today.</Text>
+                <Text style={styles.homepageComment}>
+                  {t('common:noEvent')}
+                </Text>
               )}
             </View>
             {data && data.role === 'student' ? (

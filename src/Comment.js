@@ -20,6 +20,7 @@ import {widthPercentageToDP as wp} from 'react-native-responsive-screen';
 import SettingsView from './Settings';
 import Topbar from './Topbar';
 import {ip} from './constant';
+import {useTranslation} from 'react-i18next';
 
 require('intl'); // import intl object
 require('intl/locale-data/jsonp/en-IN'); // load the required locale details
@@ -40,7 +41,8 @@ const getComments = async (date, token) => {
 const CommentStack = createStackNavigator();
 
 function CommentView(token, setToken) {
-  const [title, setTitle] = useState('Comment');
+  const {t, i18n} = useTranslation();
+  const [title, setTitle] = useState('Calendar');
   return (
     <>
       <NavigationContainer>
@@ -48,7 +50,7 @@ function CommentView(token, setToken) {
           <CommentStack.Screen name="Calendar">
             {props => (
               <>
-                <Topbar title="Comment" />
+                <Topbar title="Calendar" />
                 <CalendarView {...props} setTitle={setTitle} token={token} />
               </>
             )}
@@ -76,6 +78,7 @@ function CommentView(token, setToken) {
 }
 
 const CalendarView = props => {
+  const {t, i18n} = useTranslation();
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [choosenDate, setChoosenDate] = useState(new Date());
   const [event, setEvent] = useState([]);
@@ -112,7 +115,10 @@ const CalendarView = props => {
           </Pressable>
           {(() => {
             const date = new Date(new Date().getFullYear(), month, 0);
-            const month_text = date.toLocaleString('default', {month: 'long'});
+            const month_text = t(
+              'common:' +
+                date.toLocaleString('default', {month: 'long'}).toLowerCase(),
+            );
             const year = date.getFullYear();
             return (
               <Text style={styles.monthText}>
@@ -130,13 +136,15 @@ const CalendarView = props => {
         </View>
         <View style={styles.calendar}>
           <View style={styles.weekdayContainer}>
-            <Text style={{...styles.weekday, color: '#e65400'}}>SUN</Text>
-            <Text style={styles.weekday}>MON</Text>
-            <Text style={styles.weekday}>TUE</Text>
-            <Text style={styles.weekday}>WED</Text>
-            <Text style={styles.weekday}>THU</Text>
-            <Text style={styles.weekday}>FRI</Text>
-            <Text style={styles.weekday}>SAT</Text>
+            <Text style={{...styles.weekday, color: '#e65400'}}>
+              {t('common:sunday')}
+            </Text>
+            <Text style={styles.weekday}>{t('common:monday')}</Text>
+            <Text style={styles.weekday}>{t('common:tuesday')}</Text>
+            <Text style={styles.weekday}>{t('common:wednesday')}</Text>
+            <Text style={styles.weekday}>{t('common:thursday')}</Text>
+            <Text style={styles.weekday}>{t('common:friday')}</Text>
+            <Text style={styles.weekday}>{t('common:saturday')}</Text>
           </View>
           <View style={styles.dayContainer}>
             {(() => {

@@ -22,6 +22,8 @@ import SlidingUpPanel from 'rn-sliding-up-panel';
 import DocumentPicker from 'react-native-document-picker';
 import AnimatedLoader from 'react-native-animated-loader';
 
+import {useTranslation} from 'react-i18next';
+
 const WorkStack = createStackNavigator();
 
 function choose(choices) {
@@ -30,13 +32,14 @@ function choose(choices) {
 }
 
 function WorkView(token, setToken, navprops, settingsNav) {
+  const {t, i18n} = useTranslation();
   return (
     <NavigationContainer>
       <WorkStack.Navigator headerMode="none">
         <WorkStack.Screen name="WorkIndex">
           {props => (
             <>
-              <Topbar title="Work" {...props} />
+              <Topbar title={'Classroom'} {...props} />
               <WorkIndex {...props} token={token} />
             </>
           )}

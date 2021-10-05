@@ -12,9 +12,14 @@ import {
   TextInput,
   Keyboard,
   Pressable,
-  Linking
+  Linking,
 } from 'react-native';
 import axios from 'axios';
+import './IMLocalize';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -154,8 +159,8 @@ const LoginView = props => {
   };
 
   const changePassword = () => {
-    Linking.openURL(`http://${ip}/password-reset/`)
-  }
+    Linking.openURL(`http://${ip}/password-reset/`);
+  };
 
   return (
     <View
@@ -196,7 +201,7 @@ const LoginView = props => {
 const TabNav = [
   ['Profile', ProfileView, 'account-outline'],
   ['Work', WorkView, 'notebook-outline'],
-  ['Comment', CommentView, 'comment-quote-outline'],
+  ['Comment', CommentView, 'calendar-month'],
   ['Chat', ChatView, 'comment-text-multiple-outline'],
 ];
 
@@ -291,6 +296,16 @@ const App = () => {
               style={styles.tinyLogo}
             />
             <Text style={styles.title}> 缘学苑 </Text>
+            <Text
+              style={{
+                fontFamily: 'Poppins-Medium',
+                fontSize: wp(4),
+                marginTop: 10,
+                color: 'white',
+                textAlign: 'center',
+              }}>
+              Pusat Tuisyen Pintar Belajar Gemilang
+            </Text>
           </FadeInView>
           <Text style={styles.copyright}>
             Copyright &copy; 2021 All rights reserved.

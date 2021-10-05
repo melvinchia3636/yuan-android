@@ -7,9 +7,12 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
+import {useTranslation} from 'react-i18next';
+
 import styles from './styles';
 
 const Topbar = ({title, goback, navSettings, ...props}) => {
+  const {t, i18n} = useTranslation();
   return (
     <View style={{...styles.topbar, zIndex: 9999}}>
       {goback ? (
@@ -25,7 +28,9 @@ const Topbar = ({title, goback, navSettings, ...props}) => {
           />
         </Pressable>
       ) : null}
-      <Text style={styles.topbarTitle}>{title}</Text>
+      <Text style={styles.topbarTitle}>
+        {t('common:' + title.toLowerCase() + 'Title')}
+      </Text>
       {!props.plusContact ? (
         <Icon
           style={{color: 'white', width: wp(7)}}
