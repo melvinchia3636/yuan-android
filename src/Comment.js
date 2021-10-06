@@ -41,7 +41,6 @@ const getComments = async (date, token) => {
 const CommentStack = createStackNavigator();
 
 function CommentView(token, setToken) {
-  const {t, i18n} = useTranslation();
   const [title, setTitle] = useState('Calendar');
   return (
     <>
@@ -319,13 +318,18 @@ const CalendarView = props => {
 
 const EachCommentView = props => {
   const date = new Date(props.route.params.choosenDate);
+  const {t, i18n} = useTranslation();
 
   props.setTitle(
-    date.toLocaleDateString('en-GB', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    }),
+    'common:comment_date ' +
+      JSON.stringify([
+        date.getDate(),
+        t(
+          'common:' +
+            date.toLocaleString('default', {month: 'long'}).toLowerCase(),
+        ),
+        date.getFullYear(),
+      ]),
   );
 
   const [comment, setComment] = useState({});
@@ -442,7 +446,7 @@ const EachCommentView = props => {
             fontSize: wp(6),
             fontFamily: 'Poppins-Medium',
           }}>
-          Replies
+          {t('common:replyTitle')}
         </Text>
         <Text
           style={{
@@ -450,7 +454,7 @@ const EachCommentView = props => {
             color: '#888888',
             marginBottom: 20,
           }}>
-          {replies.count || 0} replies
+          {replies.count || 0} {t('common:replyCount')}
         </Text>
         <View style={{marginBottom: wp(4)}}>
           {replies.content
@@ -508,7 +512,7 @@ const EachCommentView = props => {
             width: '90%',
           }}
           placeholderTextColor="#999999"
-          placeholder="Type your reply here"
+          placeholder={t('common:typeReply')}
           value={message}
           onChangeText={setMessage}
         />

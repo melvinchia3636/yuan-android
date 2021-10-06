@@ -20,6 +20,7 @@ import FeatherIcons from 'react-native-vector-icons/Feather';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
 import SettingsView from './Settings';
+import {useTranslation} from 'react-i18next';
 
 const ChatStack = createStackNavigator();
 
@@ -48,7 +49,7 @@ function ChatView(token, setToken, navprops) {
           <ChatStack.Screen name="AddContact">
             {props => (
               <>
-                <Topbar title="Add Contact" goback={props.navigation.goBack} />
+                <Topbar title="AddContact" goback={props.navigation.goBack} />
                 <AddContact
                   {...props}
                   setTitle={setTitle}
@@ -211,6 +212,7 @@ const Chat = ({token, navprops, ...props}) => {
       .then(r => setChat(r.data))
       .catch(err => err);
   };
+  const {t, i18n} = useTranslation();
 
   React.useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -378,7 +380,7 @@ const Chat = ({token, navprops, ...props}) => {
               paddingBottom: hp(0.6),
               fontFamily: 'Poppins-Regular',
             }}
-            placeholder="Type a message"
+            placeholder={t('common:typeMessage')}
             placeholderTextColor="#aaaaaa"
             value={message}
             onChangeText={setMessage}

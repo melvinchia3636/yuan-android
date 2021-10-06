@@ -124,7 +124,7 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
                     alignItems: 'center',
                   }}>
                   <Text style={styles.homepageSectionHeader}>
-                    Today's Comment
+                    {t('common:todayCommentTitle')}
                   </Text>
                 </View>
                 <View
@@ -135,7 +135,7 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
                 <Text style={styles.homepageComment} numberOfLines={2}>
                   {data.comment
                     ? data.comment.content
-                    : 'No comment for today.'}
+                    : t('common:noCommentToday')}
                 </Text>
                 {data.comment ? (
                   <>
@@ -144,7 +144,9 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
                     </Text>
                     <Pressable
                       onPress={() => navprops.navigation.navigate('Comment')}>
-                      <Text style={styles.viewCommentBtn}>View Comment</Text>
+                      <Text style={styles.viewCommentBtn}>
+                        {t('common:viewCommentBtn')}
+                      </Text>
                     </Pressable>
                   </>
                 ) : null}

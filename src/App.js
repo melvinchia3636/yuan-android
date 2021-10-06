@@ -32,11 +32,11 @@ import DialogBox from 'react-native-dialogbox';
 
 import styles from './styles';
 import CommentView from './Comment';
-import Topbar from './Topbar';
 import ChatView from './Chat';
 import WorkView from './Work';
 import ProfileView from './Profile.js';
 import {ip} from './constant';
+import {useTranslation} from 'react-i18next';
 
 const FadeInView = props => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -101,6 +101,7 @@ const LoadingView = props => {
 };
 
 const LoginView = props => {
+  const {t, i18n} = useTranslation();
   const [username, onChangeUsername] = useState('');
   const [password, onChangePassword] = useState('');
   const dialogbox = createRef();
@@ -173,14 +174,14 @@ const LoginView = props => {
         style={styles.navLogo}
       />
       <TextInput
-        placeholder="Username"
+        placeholder={t('common:username')}
         placeholderTextColor="#aaaaaa"
         style={styles.loginInput}
         value={username}
         onChangeText={onChangeUsername}
       />
       <TextInput
-        placeholder="Password"
+        placeholder={t('common:password')}
         secureTextEntry={true}
         placeholderTextColor="#aaaaaa"
         style={styles.loginInput}
@@ -188,10 +189,10 @@ const LoginView = props => {
         onChangeText={onChangePassword}
       />
       <Pressable style={styles.fpBtn} onPress={changePassword}>
-        <Text style={styles.fpBtnText}>Forgot password?</Text>
+        <Text style={styles.fpBtnText}>{t('common:forgotPassword')}</Text>
       </Pressable>
       <Pressable style={styles.loginBtn} onPress={checkCredentials}>
-        <Text style={styles.loginBtnText}>LOG IN</Text>
+        <Text style={styles.loginBtnText}>{t('common:login')}</Text>
       </Pressable>
       <DialogBox ref={dialogbox} />
     </View>

@@ -17,6 +17,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 const LANGUAGES = [
   {code: 'en', label: 'English'},
   {code: 'zh_Hans', label: '中文'},
+  {code: 'my', label: 'Malayu'},
 ];
 
 const SettingsView = ({token, setToken}) => {

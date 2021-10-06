@@ -29,7 +29,13 @@ const Topbar = ({title, goback, navSettings, ...props}) => {
         </Pressable>
       ) : null}
       <Text style={styles.topbarTitle}>
-        {t('common:' + title.toLowerCase() + 'Title')}
+        {title.includes('common:comment_date')
+          ? (() => {
+              const [label, date] = title.split(' ');
+              const [day, month, year] = JSON.parse(date);
+              return `${day} ${month} ${year}`;
+            })()
+          : t('common:' + title.toLowerCase() + 'Title')}
       </Text>
       {!props.plusContact ? (
         <Icon

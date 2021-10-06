@@ -82,6 +82,7 @@
 		"color": "white",
 		"fontFamily": "Poppins-Medium",
 		"textAlign": "center",
+		"fontSize": 4,
 		"marginTop": 2
 	},
 	"fpBtn": {

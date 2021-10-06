@@ -31,7 +31,7 @@ function choose(choices) {
   return choices[index];
 }
 
-function WorkView(token, setToken, navprops, settingsNav) {
+function WorkView(token, setToken) {
   const {t, i18n} = useTranslation();
   return (
     <NavigationContainer>
@@ -64,7 +64,7 @@ function WorkView(token, setToken, navprops, settingsNav) {
                   {propss => (
                     <>
                       <Topbar
-                        title="Class Work"
+                        title="Classwork"
                         goback={props.navigation.goBack}
                         {...propss}
                       />
@@ -163,6 +163,7 @@ const Work = ({token, ...props}) => {
   const classroom = props.route.params.classroom;
   const [classWork, setClassWork] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const {t, i18n} = useTranslation();
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -278,7 +279,7 @@ const Work = ({token, ...props}) => {
               fontSize: wp(5),
               color: '#999999',
             }}>
-            Nothing Here
+            {t('common:nothing')}
           </Text>
         )}
       </ScrollView>
@@ -287,6 +288,7 @@ const Work = ({token, ...props}) => {
 };
 
 const AddWorkButton = ({askForFile, hollow}) => {
+  const {t, i18n} = useTranslation();
   return (
     <Pressable
       onPress={askForFile}
@@ -318,13 +320,14 @@ const AddWorkButton = ({askForFile, hollow}) => {
           fontFamily: 'Poppins-Medium',
           fontSize: wp(3.5),
         }}>
-        Add work
+        {t('common:addWork')}
       </Text>
     </Pressable>
   );
 };
 
 const HandInButton = ({handInFunc}) => {
+  const {t, i18n} = useTranslation();
   return (
     <Pressable
       onPress={handInFunc}
@@ -341,13 +344,14 @@ const HandInButton = ({handInFunc}) => {
           fontFamily: 'Poppins-Medium',
           fontSize: wp(3.5),
         }}>
-        Hand In
+        {t('common:handIn')}
       </Text>
     </Pressable>
   );
 };
 
 const UnsubmitButton = ({unsubmitFunc}) => {
+  const {t, i18n} = useTranslation();
   return (
     <Pressable
       onPress={unsubmitFunc}
@@ -366,7 +370,7 @@ const UnsubmitButton = ({unsubmitFunc}) => {
           fontFamily: 'Poppins-Medium',
           fontSize: wp(3.5),
         }}>
-        Unsubmit
+        {t('common:unsubmit')}
       </Text>
     </Pressable>
   );
@@ -380,6 +384,7 @@ const EachWork = ({token, id, ...props}) => {
   const [isLoading, setLoading] = useState(false);
   const [myWorks, setMyWorks] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const {t, i18n} = useTranslation();
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -596,7 +601,7 @@ const EachWork = ({token, id, ...props}) => {
                 fontFamily: 'Poppins-Regular',
                 marginBottom: 10,
               }}>
-              Your work
+              {t('common:yourWorkTitle')}
             </Text>
             {isExpand ? (
               <View style={{maxHeight: hp(55)}}>
