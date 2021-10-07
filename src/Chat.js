@@ -35,7 +35,10 @@ function ChatView(token, setToken, navprops) {
               <>
                 <Topbar
                   title={title}
-                  plusContact={() => props.navigation.navigate('AddContact')}
+                  notSettings={[
+                    () => props.navigation.navigate('AddContact'),
+                    'message-plus-outline',
+                  ]}
                 />
                 <ChatIndex
                   {...props}

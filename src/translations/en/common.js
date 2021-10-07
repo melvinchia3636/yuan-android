@@ -46,4 +46,13 @@ export default {
   addWork: 'Add Work',
   handIn: 'Hand In',
   unsubmit: 'Unsubmit',
+  addmaterialTitle: 'Add Material',
+  addassignmentTitle: 'Add Assignment',
+  addAttachment: 'Add Attachment',
+  titleTitle: 'Title',
+  description: 'Description',
+  titleCreate: 'Create',
+  btnMaterial: 'Material',
+  btnAssignment: 'Assignment',
+  attachment: 'Attachment',
 };

@@ -12,6 +12,7 @@ import {
   Image,
   TextInput,
   Keyboard,
+  Linking,
 } from 'react-native';
 import styles from './styles';
 import axios from 'axios';
@@ -280,7 +281,9 @@ const CalendarView = props => {
                 choosenDate: choosenDate.toDateString(),
               })
             }>
-            <Text style={styles.viewCommentBtn}>View Comment</Text>
+            <Text style={styles.viewCommentBtn}>
+              {t('common:viewCommentBtn')}
+            </Text>
           </Pressable>
         ) : null}
         <View
@@ -410,6 +413,27 @@ const EachCommentView = props => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const formatURL = content => {
+    const urlPattern =
+      /((?:http|ftp|https):\/\/(?:[\w_-]+(?:(?:\.[\w_-]+)+))(?:[\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]))/g;
+    return (
+      <>
+        {content?.split(urlPattern)?.map(e => {
+          let url = e.match(urlPattern);
+          return url ? (
+            <Text
+              style={{color: '#e64d00'}}
+              onPress={() => Linking.openURL(url[0])}>
+              {e}
+            </Text>
+          ) : (
+            <Text>{e}</Text>
+          );
+        })}
+      </>
+    );
+  };
+
   return (
     <ScrollView
       style={{
@@ -436,7 +460,7 @@ const EachCommentView = props => {
             color: 'black',
             marginBottom: wp(8),
           }}>
-          {comment.content}
+          {formatURL(comment.content)}
         </Text>
       </View>
       <View>

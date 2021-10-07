@@ -46,4 +46,13 @@ export default {
   addWork: '添加作业',
   handIn: '提交',
   unsubmit: '取消提交',
+  addmaterialTitle: '添加教材',
+  addassignmentTitle: '添加作业',
+  addAttachment: '添加附件',
+  titleTitle: '标题',
+  description: '描述（可选）',
+  titleCreate: '创建',
+  btnMaterial: '教材',
+  btnAssignment: '作业',
+  attachment: '附件',
 };

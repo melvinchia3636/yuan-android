@@ -1,6 +1,14 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useState, useEffect, useRef} from 'react';
-import {View, Text, ScrollView, Pressable, RefreshControl} from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  RefreshControl,
+  PermissionsAndroid,
+  Platform,
+} from 'react-native';
 import axios from 'axios';
 import {
   widthPercentageToDP as wp,
@@ -14,6 +22,7 @@ import SettingsView from './Settings';
 
 import Feather from 'react-native-vector-icons/Feather';
 import Entypo from 'react-native-vector-icons/Entypo';
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
@@ -23,6 +32,10 @@ import DocumentPicker from 'react-native-document-picker';
 import AnimatedLoader from 'react-native-animated-loader';
 
 import {useTranslation} from 'react-i18next';
+
+import {OutlinedTextField} from 'rn-material-ui-textfield';
+import Toast from 'react-native-tiny-toast';
+import RNFetchBlob from 'rn-fetch-blob';
 
 const WorkStack = createStackNavigator();
 
@@ -65,7 +78,7 @@ function WorkView(token, setToken) {
                     <>
                       <Topbar
                         title="Classwork"
-                        goback={props.navigation.goBack}
+                        goback={() => props.navigation.navigate('WorkView')}
                         {...propss}
                       />
                       <EachWork {...propss} token={token} />
@@ -73,6 +86,13 @@ function WorkView(token, setToken) {
                   )}
                 </WorkStack.Screen>
               </WorkStack.Navigator>
+            </>
+          )}
+        </WorkStack.Screen>
+        <WorkStack.Screen name="AddWork">
+          {props => (
+            <>
+              <AddWork {...props} token={token} />
             </>
           )}
         </WorkStack.Screen>
@@ -132,7 +152,7 @@ const WorkIndex = ({token, ...props}) => {
             style={{
               backgroundColor: e.background,
               width: '100%',
-              height: hp(20),
+              height: hp(16),
               padding: 8,
               paddingHorizontal: 16,
               marginVertical: 4,
@@ -144,8 +164,8 @@ const WorkIndex = ({token, ...props}) => {
             <Text
               style={{
                 color: 'white',
-                fontFamily: 'Poppins-Regular',
-                fontSize: wp(6),
+                fontFamily: 'Poppins-Medium',
+                fontSize: wp(5),
               }}>
               {e.subject_name}
             </Text>
@@ -168,7 +188,10 @@ const Work = ({token, ...props}) => {
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     fetchClassWorks()
-      .then(res => setClassWork(res))
+      .then(res => {
+        res.data = res.data.reverse();
+        setClassWork(res);
+      })
       .then(setRefreshing(false));
   }, []);
 
@@ -183,107 +206,252 @@ const Work = ({token, ...props}) => {
   };
 
   useEffect(() => {
-    fetchClassWorks().then(res => setClassWork(res));
+    fetchClassWorks().then(res => {
+      res.data = res.data.reverse();
+      setClassWork(res);
+    });
+
+    props.navigation.addListener('focus', () => {
+      fetchClassWorks().then(res => {
+        res.data = res.data.reverse();
+        setClassWork(res);
+      });
+      panelRef.current?.hide();
+    });
   }, []);
 
+  const panelRef = useRef();
+  const [panelHideToggle, setPanelHideToggle] = useState(false);
+
+  !panelHideToggle ? panelRef.current?.hide() : null;
+
   return (
-    <ScrollView
-      style={{
-        padding: 8,
-      }}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          colors={['#e64d00']}
-        />
-      }>
-      <View
-        style={{
-          backgroundColor: classroom.background,
-          width: '100%',
-          height: hp(20),
-          padding: 8,
-          paddingHorizontal: 16,
-          marginVertical: 4,
-          borderRadius: 10,
-          justifyContent: 'space-between',
-        }}>
-        <Text
-          style={{
-            color: 'white',
-            fontFamily: 'Poppins-Regular',
-            fontSize: wp(6),
-          }}>
-          {classroom.subject_name}
-        </Text>
-        <Text style={{color: 'white', fontFamily: 'Poppins-Regular'}}>
-          {classroom.admin_username}
-        </Text>
-      </View>
+    <>
       <ScrollView
-        contentContainerStyle={{
-          justifyContent: classWork.length === 0 ? 'center' : 'flex-start',
-          minHeight: hp(60),
-        }}>
-        {classWork.length > 0 ? (
-          classWork.map(e => (
-            <Pressable
-              key={e.id}
-              style={{
-                backgroundColor: 'white',
-                padding: 16,
-                marginVertical: 4,
-                borderRadius: 8,
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
-              onPress={() => props.navigation.navigate('EachWork', {id: e.id})}>
-              <Feather
-                name={choose(['paperclip', 'clipboard'])}
-                size={32}
-                color="#999999"
-                style={{marginRight: 16}}
-              />
-              <View>
-                <Text
-                  style={{
-                    fontFamily: 'Poppins-Medium',
-                    fontSize: wp(4),
-                    width: wp(76),
-                    color: '#666666',
-                  }}
-                  numberOfLines={1}>
-                  {e.title}
-                </Text>
-                <Text
-                  style={{
-                    color: '#666666',
-                    fontFamily: 'Poppins-Regular',
-                    fontSize: wp(3),
-                  }}>
-                  {new Date(e.time).toLocaleString('en-GB', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  })}
-                </Text>
-              </View>
-            </Pressable>
-          ))
-        ) : (
+        style={{
+          padding: 8,
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#e64d00']}
+          />
+        }>
+        <View
+          style={{
+            backgroundColor: classroom.background,
+            width: '100%',
+            height: hp(20),
+            padding: 8,
+            paddingHorizontal: 16,
+            marginVertical: 4,
+            borderRadius: 10,
+            justifyContent: 'space-between',
+          }}>
           <Text
             style={{
-              textAlign: 'center',
+              color: 'white',
               fontFamily: 'Poppins-Regular',
-              fontSize: wp(5),
-              color: '#999999',
+              fontSize: wp(6),
             }}>
-            {t('common:nothing')}
+            {classroom.subject_name}
           </Text>
-        )}
+          <Text style={{color: 'white', fontFamily: 'Poppins-Regular'}}>
+            {classroom.admin_username}
+          </Text>
+        </View>
+        <ScrollView
+          contentContainerStyle={{
+            justifyContent: classWork.data?.length === 0 ? 'center' : 'flex-start',
+            minHeight: hp(60),
+            marginBottom: 16,
+          }}>
+          {classWork?.data?.length > 0 ? (
+            classWork.data.map(e => (
+              <Pressable
+                key={e.id}
+                style={{
+                  backgroundColor: 'white',
+                  padding: 16,
+                  marginVertical: 4,
+                  borderRadius: 8,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+                onPress={() => {
+                  props.navigation.navigate('EachWork', {id: e.id});
+                }}>
+                <Feather
+                  name={e.type === 'assignment' ? 'clipboard' : 'book'}
+                  size={32}
+                  color="#999999"
+                  style={{marginRight: 16}}
+                />
+                <View>
+                  <Text
+                    style={{
+                      fontFamily: 'Poppins-Medium',
+                      fontSize: wp(4),
+                      width: wp(76),
+                      color: '#666666',
+                    }}
+                    numberOfLines={1}>
+                    {e.title}
+                  </Text>
+                  <Text
+                    style={{
+                      color: '#666666',
+                      fontFamily: 'Poppins-Regular',
+                      fontSize: wp(3),
+                    }}>
+                    {new Date(e.time).toLocaleString('en-GB', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </Text>
+                </View>
+              </Pressable>
+            ))
+          ) : (
+            <Text
+              style={{
+                textAlign: 'center',
+                fontFamily: 'Poppins-Regular',
+                fontSize: wp(5),
+                color: '#999999',
+              }}>
+              {t('common:nothing')}
+            </Text>
+          )}
+        </ScrollView>
       </ScrollView>
-    </ScrollView>
+      {classWork.editable ? (
+        <>
+          {panelHideToggle ? (
+            <Pressable
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: hp(100),
+                backgroundColor: 'black',
+                opacity: 0.4,
+              }}
+              onPress={() => {
+                panelRef.current?.hide();
+                setPanelHideToggle(false);
+              }}
+            />
+          ) : (
+            <Pressable
+              onPress={() => {
+                panelRef.current.show();
+                setPanelHideToggle(true);
+              }}
+              style={{
+                backgroundColor: '#e64d00',
+                width: 64,
+                height: 64,
+                borderRadius: 64,
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'absolute',
+                bottom: 12,
+                right: 12,
+                elevation: 6,
+              }}>
+              <Feather name="plus" size={24} color="white" />
+            </Pressable>
+          )}
+          <SlidingUpPanel
+            draggableRange={{top: 180, bottom: -200}}
+            allowDragging={false}
+            showBackdrop={false /*For making it modal-like*/}
+            ref={panelRef}
+            onBottomReached={() => setPanelHideToggle(false)}
+            friction={0.4}>
+            <View
+              style={{
+                backgroundColor: 'white',
+                width: wp(100),
+                height: hp(90),
+                borderRadius: 25,
+                elevation: 15,
+                paddingHorizontal: 28,
+                paddingVertical: 15,
+                borderWidth: 1,
+                borderColor: 'rgba(0, 0, 0, 0.08)',
+              }}>
+              <Text
+                style={{
+                  fontSize: wp(5.6),
+                  fontFamily: 'Poppins-Regular',
+                  color: '#363636',
+                  textAlign: 'center',
+                }}>
+                {t('common:titleCreate')}
+              </Text>
+              <View style={{marginTop: 20}}>
+                <Pressable
+                  onPress={() => {
+                    panelRef.current?.hide();
+                    setPanelHideToggle(false);
+                    setTimeout(() => {
+                      props.navigation.navigate('AddWork', {
+                        classroom: classroom.id,
+                        type: 'material',
+                      });
+                    }, 120);
+                  }}
+                  style={{
+                    flexDirection: 'row',
+                  }}>
+                  <Feather name="book" size={24} color="#363636" />
+                  <Text
+                    style={{
+                      fontFamily: 'Poppins-Medium',
+                      color: '#363636',
+                      fontSize: wp(4),
+                      marginLeft: 10,
+                    }}>
+                    {t('common:btnMaterial')}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    panelRef.current?.hide();
+                    setPanelHideToggle(false);
+                    setTimeout(() => {
+                      props.navigation.navigate('AddWork', {
+                        classroom: classroom.id,
+                        type: 'assignment',
+                      });
+                    }, 100);
+                  }}
+                  style={{
+                    flexDirection: 'row',
+                    marginTop: 20,
+                  }}>
+                  <Feather name="clipboard" size={24} color="#363636" />
+                  <Text
+                    style={{
+                      fontFamily: 'Poppins-Medium',
+                      color: '#363636',
+                      fontSize: wp(4),
+                      marginLeft: 10,
+                    }}>
+                    {t('common:btnAssignment')}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          </SlidingUpPanel>
+        </>
+      ) : null}
+    </>
   );
 };
 
@@ -384,6 +552,7 @@ const EachWork = ({token, id, ...props}) => {
   const [isLoading, setLoading] = useState(false);
   const [myWorks, setMyWorks] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [attachment, setAttachment] = useState(null);
   const {t, i18n} = useTranslation();
 
   const onRefresh = React.useCallback(() => {
@@ -459,6 +628,70 @@ const EachWork = ({token, id, ...props}) => {
       .catch(err => console.log(err));
   };
 
+  const downloadFile = async url => {
+    const getFileExtention = fileUrl => {
+      // To get the file extension
+      return /[.]/.exec(fileUrl) ? /[^.]+$/.exec(fileUrl) : undefined;
+    };
+
+    const _downloadFile = () => {
+      let date = new Date();
+      let FILE_URL = 'http://' + ip + '/media/' + url;
+      let file_ext = getFileExtention(FILE_URL);
+
+      file_ext = '.' + file_ext[0];
+
+      const {config, fs} = RNFetchBlob;
+      let RootDir = fs.dirs.PictureDir;
+      let options = {
+        fileCache: true,
+        addAndroidDownloads: {
+          path:
+            RootDir +
+            '/yuan_' +
+            Math.floor(date.getTime() + date.getSeconds() / 2) +
+            file_ext,
+          description: 'downloading file...',
+          notification: true,
+          useDownloadManager: true,
+        },
+      };
+      config(options)
+        .fetch('GET', FILE_URL)
+        .then(res => {
+          console.log('res -> ', JSON.stringify(res));
+        });
+    };
+
+    if (Platform.OS === 'ios') {
+      downloadFile();
+    } else {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: 'Storage Permission Required',
+            message:
+              'Application needs access to your storage to download File',
+          },
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          _downloadFile();
+          Toast.show('Downloading file...', {
+            containerStyle: {
+              backgroundColor: 'rgba(0, 0, 0, .5)',
+              paddingHorizontal: 20,
+              borderRadius: 30,
+            },
+          });
+          console.log('Storage Permission Granted.');
+        }
+      } catch (err) {
+        console.log('++++' + err);
+      }
+    }
+  };
+
   useEffect(() => {
     fetchWorkDetails().then(res => {
       if (res) {
@@ -469,9 +702,14 @@ const EachWork = ({token, id, ...props}) => {
           setMyWorks(media);
           setSubmitted(true);
         }
+        const attachments = res.attachment ? JSON.parse(res.attachment) : null;
+        if (attachments && attachments.length > 0) {
+          setAttachment(attachments);
+          setSubmitted(true);
+        }
       }
     });
-    slidePanel.current.hide();
+    slidePanel.current?.hide();
   }, []);
 
   return (
@@ -536,164 +774,407 @@ const EachWork = ({token, id, ...props}) => {
             borderTopWidth: 1,
             marginHorizontal: 20,
             fontSize: wp(3.5),
-            paddingTop: 20,
-            paddingBottom: hp(24),
+            paddingVertical: 20,
             fontFamily: 'Poppins-Regular',
             color: '#141414',
           }}>
           {workDetails.details}
         </Text>
-      </ScrollView>
-      <SlidingUpPanel
-        ref={slidePanel}
-        backdropOpacity={0}
-        onDragStart={position => {
-          if (position > hp(30)) {
-            setExpand(true);
-          }
-          if (position < hp(60)) {
-            setExpand(false);
-          }
-        }}
-        onBottomReached={() => setExpand(false)}
-        draggableRange={{
-          top: hp(80),
-          bottom: myWorks.length > 0 ? hp(25) : hp(20),
-        }}
-        friction={0.6}
-        allowDragging={false}>
-        <View style={styles.container}>
-          <View
+        {attachment ? (
+          <Text
             style={{
-              backgroundColor: 'white',
-              width: wp(100),
-              height: hp(90),
-              borderRadius: 25,
-              elevation: 15,
-              paddingHorizontal: 20,
-              paddingVertical: 15,
-              borderWidth: 1,
-              borderColor: 'rgba(0, 0, 0, 0.08)',
+              marginHorizontal: 20,
+              fontSize: wp(4.2),
+              paddingTop: 20,
+              paddingBottom: 10,
+              fontFamily: 'Poppins-Regular',
+              color: '#999999',
             }}>
-            <Pressable
+            {t('common:attachment')}
+          </Text>
+        ) : null}
+        <View
+          style={{
+            paddingHorizontal: 20,
+            marginBottom: 20,
+          }}>
+          {attachment?.map((e, i) => (
+            <View
               style={{
-                width: '100%',
+                paddingVertical: 8,
+                paddingHorizontal: 15,
+                borderWidth: 1,
+                borderColor: 'rgba(0, 0, 0, 0.1)',
+                borderRadius: 30,
+                marginBottom: 5,
+                flexDirection: 'row',
                 alignItems: 'center',
-                paddingVertical: 10,
-              }}
-              onPress={() => {
-                !isExpand
-                  ? slidePanel.current.show()
-                  : slidePanel.current.hide();
-                setExpand(true);
+                justifyContent: 'space-between',
               }}>
-              <Entypo
-                name={`chevron-${isExpand ? 'down' : 'up'}`}
-                size={wp(5)}
-                color="#999999"
-                width={100}
-              />
-            </Pressable>
-            <Text
-              style={{
-                color: '#141414',
-                fontSize: wp(5),
-                fontFamily: 'Poppins-Regular',
-                marginBottom: 10,
-              }}>
-              {t('common:yourWorkTitle')}
-            </Text>
-            {isExpand ? (
-              <View style={{maxHeight: hp(55)}}>
-                <ScrollView style={{marginBottom: 20}}>
-                  {myWorks.map((e, i) => (
-                    <Pressable
-                      style={{
-                        paddingVertical: 5,
-                        paddingHorizontal: 15,
-                        borderRadius: 100,
-                        borderWidth: 1,
-                        borderColor: 'rgba(0, 0, 0, 0.1)',
-                        marginBottom: 5,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                      }}>
-                      <Text
-                        numberOfLines={1}
-                        style={{
-                          fontFamily: 'Poppins-Medium',
-                          color: '#333333',
-                          lineHeight: wp(5),
-                          maxWidth: '90%',
-                        }}>
-                        {e.content.name}
-                      </Text>
-                      {!isSubmitted ? (
-                        <Pressable
-                          onPress={() => {
-                            setMyWorks(
-                              myWorks.filter((_, index) => index !== i),
-                            );
-                          }}>
-                          <Feather name="x" size={18} color="#141414" />
-                        </Pressable>
-                      ) : null}
-                    </Pressable>
-                  ))}
-                </ScrollView>
-              </View>
-            ) : myWorks.length > 0 ? (
-              <View
+              <Text
+                numberOfLines={1}
                 style={{
-                  paddingVertical: 5,
-                  paddingHorizontal: 15,
-                  borderRadius: 100,
-                  borderWidth: 1,
-                  borderColor: 'rgba(0, 0, 0, 0.1)',
-                  marginBottom: 20,
+                  fontFamily: 'Poppins-Medium',
+                  color: '#333333',
+                  lineHeight: wp(5),
+                  maxWidth: '90%',
                 }}>
-                <Text
-                  numberOfLines={1}
-                  style={{
-                    fontFamily: 'Poppins-Medium',
-                    color: '#333333',
-                  }}>
-                  {myWorks.length === 1
-                    ? myWorks[0].content.name
-                    : myWorks.length + ' attachments'}
-                </Text>
-              </View>
-            ) : null}
-            {isExpand ? (
-              <View>
-                {isSubmitted ? (
-                  <>
-                    <UnsubmitButton unsubmitFunc={unsubmitWork} />
-                  </>
-                ) : (
-                  <>
-                    <AddWorkButton askForFile={askForFile} hollow={true} />
-                    <HandInButton handInFunc={handInWork} />
-                  </>
-                )}
-              </View>
-            ) : (
-              <View>
-                {!isSubmitted ? (
-                  myWorks.length <= 0 ? (
-                    <AddWorkButton askForFile={askForFile} />
-                  ) : (
-                    <HandInButton handInFunc={handInWork} />
-                  )
-                ) : (
-                  <UnsubmitButton unsubmitFunc={unsubmitWork} />
-                )}
-              </View>
-            )}
-          </View>
+                {e.name}
+              </Text>
+              <Pressable
+                onPress={() => {
+                  console.log(e);
+                  downloadFile(e.path);
+                }}>
+                <MaterialIcon name="download" size={wp(4.6)} />
+              </Pressable>
+            </View>
+          ))}
         </View>
-      </SlidingUpPanel>
+      </ScrollView>
+      {workDetails.type === 'assignment' ? (
+        <SlidingUpPanel
+          ref={slidePanel}
+          backdropOpacity={0}
+          onDragStart={position => {
+            if (position > hp(30)) {
+              setExpand(true);
+            }
+            if (position < hp(60)) {
+              setExpand(false);
+            }
+          }}
+          onBottomReached={() => setExpand(false)}
+          draggableRange={{
+            top: hp(80),
+            bottom: myWorks.length > 0 ? hp(25) : hp(20),
+          }}
+          friction={0.6}
+          allowDragging={false}>
+          <View style={styles.container}>
+            <View
+              style={{
+                backgroundColor: 'white',
+                width: wp(100),
+                height: hp(90),
+                borderRadius: 25,
+                elevation: 15,
+                paddingHorizontal: 20,
+                paddingVertical: 15,
+                borderWidth: 1,
+                borderColor: 'rgba(0, 0, 0, 0.08)',
+              }}>
+              <Pressable
+                style={{
+                  width: '100%',
+                  alignItems: 'center',
+                  paddingVertical: 10,
+                }}
+                onPress={() => {
+                  !isExpand
+                    ? slidePanel.current.show()
+                    : slidePanel.current?.hide();
+                  setExpand(true);
+                }}>
+                <Entypo
+                  name={`chevron-${isExpand ? 'down' : 'up'}`}
+                  size={wp(5)}
+                  color="#999999"
+                  width={100}
+                />
+              </Pressable>
+              <Text
+                style={{
+                  color: '#141414',
+                  fontSize: wp(5),
+                  fontFamily: 'Poppins-Regular',
+                  marginBottom: 10,
+                }}>
+                {t('common:yourWorkTitle')}
+              </Text>
+              {isExpand ? (
+                <View style={{maxHeight: hp(55)}}>
+                  <ScrollView style={{marginBottom: 20}}>
+                    {myWorks.map((e, i) => (
+                      <Pressable
+                        style={{
+                          paddingVertical: 5,
+                          paddingHorizontal: 15,
+                          borderRadius: 100,
+                          borderWidth: 1,
+                          borderColor: 'rgba(0, 0, 0, 0.1)',
+                          marginBottom: 5,
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                        }}>
+                        <Text
+                          numberOfLines={1}
+                          style={{
+                            fontFamily: 'Poppins-Medium',
+                            color: '#333333',
+                            lineHeight: wp(5),
+                            maxWidth: '90%',
+                          }}>
+                          {e.content.name}
+                        </Text>
+                        {!isSubmitted ? (
+                          <Pressable
+                            onPress={() => {
+                              setMyWorks(
+                                myWorks.filter((_, index) => index !== i),
+                              );
+                            }}>
+                            <Feather name="x" size={18} color="#141414" />
+                          </Pressable>
+                        ) : null}
+                      </Pressable>
+                    ))}
+                  </ScrollView>
+                </View>
+              ) : myWorks.length > 0 ? (
+                <View
+                  style={{
+                    paddingVertical: 5,
+                    paddingHorizontal: 15,
+                    borderRadius: 100,
+                    borderWidth: 1,
+                    borderColor: 'rgba(0, 0, 0, 0.1)',
+                    marginBottom: 20,
+                  }}>
+                  <Text
+                    numberOfLines={1}
+                    style={{
+                      fontFamily: 'Poppins-Medium',
+                      color: '#333333',
+                    }}>
+                    {myWorks.length === 1
+                      ? myWorks[0].content.name
+                      : myWorks.length + ' attachments'}
+                  </Text>
+                </View>
+              ) : null}
+              {isExpand ? (
+                <View>
+                  {isSubmitted ? (
+                    <>
+                      <UnsubmitButton unsubmitFunc={unsubmitWork} />
+                    </>
+                  ) : (
+                    <>
+                      <AddWorkButton askForFile={askForFile} hollow={true} />
+                      <HandInButton handInFunc={handInWork} />
+                    </>
+                  )}
+                </View>
+              ) : (
+                <View>
+                  {!isSubmitted ? (
+                    myWorks.length <= 0 ? (
+                      <AddWorkButton askForFile={askForFile} />
+                    ) : (
+                      <HandInButton handInFunc={handInWork} />
+                    )
+                  ) : (
+                    <UnsubmitButton unsubmitFunc={unsubmitWork} />
+                  )}
+                </View>
+              )}
+            </View>
+          </View>
+        </SlidingUpPanel>
+      ) : null}
+    </>
+  );
+};
+
+const AddWork = props => {
+  const classroom = props.route.params.classroom;
+  const type = props.route.params.type;
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [isError, setIsError] = useState(false);
+  const [attachment, setAttachment] = useState([]);
+  const [isLoading, setLoading] = useState(false);
+  const {t, i18n} = useTranslation();
+
+  const submitContent = () => {
+    if (title.trim()) {
+      const body = new FormData();
+      const attachments = attachment.filter(e => e.type === 'new');
+
+      attachments.forEach(item => body.append('file[]', item.content));
+      body.append('title', title.trim());
+      body.append('description', description.trim());
+      body.append('type', type);
+      setLoading(true);
+      axios({
+        url: `http://${ip}/api/v1/classroom/create-classwork/${classroom}`,
+        method: 'POST',
+        headers: {
+          authorization: 'Token ' + props.token,
+        },
+        data: body,
+      })
+        .then(() => {
+          Toast.show(
+            type[0].toUpperCase() + type.slice(1) + ' created successfully',
+            {
+              containerStyle: {
+                backgroundColor: 'rgba(0, 0, 0, .5)',
+                paddingHorizontal: 20,
+                borderRadius: 30,
+              },
+            },
+          );
+          props.navigation.goBack();
+        })
+        .catch(err => console.log(err));
+    } else {
+      setIsError(true);
+    }
+  };
+
+  const askForFile = async () => {
+    try {
+      const ress = await DocumentPicker.pickMultiple({
+        type: [DocumentPicker.types.allFiles],
+      });
+      const work = [];
+      for (let res of ress) {
+        if (!attachment.map(e => e.content.name).includes(res.name)) {
+          work.push({type: 'new', content: res});
+        }
+      }
+      setAttachment(attachment.concat(work));
+    } catch (err) {
+      if (DocumentPicker.isCancel(err)) {
+        console.log('error -----', err);
+      } else {
+      }
+    }
+  };
+
+  return (
+    <>
+      <Topbar
+        title={'add' + type}
+        goback={props.navigation.goBack}
+        {...props}
+        notSettings={[submitContent, 'send']}
+      />
+      <View style={{backgroundColor: 'white', height: hp(100)}}>
+        <ScrollView
+          style={{
+            paddingHorizontal: 20,
+            paddingVertical: 20,
+          }}>
+          <OutlinedTextField
+            label={t('common:titleTitle')}
+            tintColor="#f64d00"
+            error={isError ? 'Required' : ''}
+            characterRestriction={200}
+            containerStyle={{marginTop: 10}}
+            onChangeText={t => {
+              setTitle(t);
+              setIsError(false);
+            }}
+            labelTextStyle={{fontFamily: 'Poppins-Medium', paddingTop: 3}}
+          />
+          <OutlinedTextField
+            label={t('common:description')}
+            tintColor="#f64d00"
+            characterRestriction={1000}
+            containerStyle={{marginTop: 10}}
+            onChangeText={t => setDescription(t)}
+            labelTextStyle={{fontFamily: 'Poppins-Medium', paddingTop: 3}}
+            multiline
+          />
+          <View style={{paddingBottom: 180, marginTop: 30}}>
+            <View style={{marginBottom: 10}}>
+              {attachment.map((e, i) => (
+                <Pressable
+                  style={{
+                    paddingVertical: 5,
+                    paddingHorizontal: 15,
+                    marginBottom: 5,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}>
+                  <Text
+                    numberOfLines={1}
+                    style={{
+                      fontFamily: 'Poppins-Medium',
+                      color: '#333333',
+                      lineHeight: wp(5),
+                      maxWidth: '90%',
+                    }}>
+                    {e.content.name}
+                  </Text>
+                  <Pressable
+                    onPress={() => {
+                      setAttachment(
+                        attachment.filter((_, index) => index !== i),
+                      );
+                    }}>
+                    <Feather name="x" size={18} color="#141414" />
+                  </Pressable>
+                </Pressable>
+              ))}
+            </View>
+            <Pressable
+              onPress={askForFile}
+              style={{
+                backgroundColor: 'white',
+                padding: 5,
+                paddingTop: 8,
+                borderRadius: 5,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderWidth: 1,
+                borderColor: 'rgba(0, 0, 0, 0.38)',
+              }}>
+              <Feather
+                name="paperclip"
+                style={{
+                  color: '#e64d00',
+                  marginTop: -3,
+                  marginRight: 5,
+                }}
+                size={wp(4.5)}
+              />
+              <Text
+                style={{
+                  color: '#e64d00',
+                  textAlign: 'center',
+                  fontFamily: 'Poppins-Medium',
+                  fontSize: wp(3.5),
+                }}>
+                {t('common:addAttachment')}
+              </Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+        <AnimatedLoader
+          visible={isLoading}
+          overlayColor="rgba(255,255,255,.9)"
+          source={require('./loader.json')}
+          animationStyle={{
+            width: 100,
+            height: 100,
+          }}
+          speed={1}>
+          <Text
+            style={{
+              fontFamily: 'Poppins-Regular',
+              fontSize: wp(4),
+            }}>
+            Uploading ...
+          </Text>
+        </AnimatedLoader>
+      </View>
     </>
   );
 };

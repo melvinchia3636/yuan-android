@@ -37,7 +37,7 @@ const Topbar = ({title, goback, navSettings, ...props}) => {
             })()
           : t('common:' + title.toLowerCase() + 'Title')}
       </Text>
-      {!props.plusContact ? (
+      {!props.notSettings ? (
         <Icon
           style={{color: 'white', width: wp(7)}}
           name={
@@ -52,10 +52,10 @@ const Topbar = ({title, goback, navSettings, ...props}) => {
         />
       ) : (
         <Icon
-          style={{color: 'white', width: wp(7)}}
-          name="message-plus-outline"
+          style={{color: 'white'}}
           size={wp(7)}
-          onPress={props.plusContact}
+          name={props.notSettings[1]}
+          onPress={props.notSettings[0]}
         />
       )}
     </View>

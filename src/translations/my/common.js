@@ -46,4 +46,13 @@ export default {
   addWork: 'Tambah Kerja',
   handIn: 'Hantar',
   unsubmit: 'Batalkan Penghantaran',
+  addmaterialTitle: 'Add Material',
+  addassignmentTitle: 'Add Assignment',
+  addAttachment: 'Add Attachment',
+  titleTitle: 'Title',
+  description: 'Description',
+  titleCreate: '创建',
+  btnMaterial: '教材',
+  btnAssignment: '作业',
+  attachment: '附件',
 };
