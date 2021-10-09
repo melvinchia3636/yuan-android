@@ -20,7 +20,10 @@ const ProfileView = (token, setToken, navprops) => {
   const {t, i18n} = useTranslation();
   return (
     <NavigationContainer>
-      <ProfileStack.Navigator headerMode={false}>
+      <ProfileStack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}>
         <ProfileStack.Screen name="Profile">
           {props => (
             <>

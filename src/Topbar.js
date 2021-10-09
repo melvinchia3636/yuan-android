@@ -50,14 +50,14 @@ const Topbar = ({title, goback, navSettings, ...props}) => {
               : () => {}
           }
         />
-      ) : (
+      ) : props.notSettings[1] ? (
         <Icon
           style={{color: 'white'}}
           size={wp(7)}
           name={props.notSettings[1]}
           onPress={props.notSettings[0]}
         />
-      )}
+      ) : null}
     </View>
   );
 };

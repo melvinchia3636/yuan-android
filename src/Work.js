@@ -8,6 +8,7 @@ import {
   RefreshControl,
   PermissionsAndroid,
   Platform,
+  Linking,
 } from 'react-native';
 import axios from 'axios';
 import {
@@ -26,6 +27,7 @@ import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
+import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 
 import SlidingUpPanel from 'rn-sliding-up-panel';
 import DocumentPicker from 'react-native-document-picker';
@@ -37,12 +39,70 @@ import {OutlinedTextField} from 'rn-material-ui-textfield';
 import Toast from 'react-native-tiny-toast';
 import RNFetchBlob from 'rn-fetch-blob';
 
-const WorkStack = createStackNavigator();
+const downloadFile = async url => {
+  const getFileExtention = fileUrl => {
+    // To get the file extension
+    return /[.]/.exec(fileUrl) ? /[^.]+$/.exec(fileUrl) : undefined;
+  };
 
-function choose(choices) {
-  var index = Math.floor(Math.random() * choices.length);
-  return choices[index];
-}
+  const _downloadFile = () => {
+    let date = new Date();
+    let FILE_URL = 'http://' + ip + '/media/' + url;
+    let file_ext = getFileExtention(FILE_URL);
+
+    file_ext = '.' + file_ext[0];
+
+    const {config, fs} = RNFetchBlob;
+    let RootDir = fs.dirs.PictureDir;
+    let options = {
+      fileCache: true,
+      addAndroidDownloads: {
+        path:
+          RootDir +
+          '/yuan_' +
+          Math.floor(date.getTime() + date.getSeconds() / 2) +
+          file_ext,
+        description: 'downloading file...',
+        notification: true,
+        useDownloadManager: true,
+      },
+    };
+    config(options)
+      .fetch('GET', FILE_URL)
+      .then(res => {
+        console.log('res -> ', JSON.stringify(res));
+      });
+  };
+
+  if (Platform.OS === 'ios') {
+    downloadFile();
+  } else {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: 'Storage Permission Required',
+          message: 'Application needs access to your storage to download File',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        _downloadFile();
+        Toast.show('Downloading file...', {
+          containerStyle: {
+            backgroundColor: 'rgba(0, 0, 0, .5)',
+            paddingHorizontal: 20,
+            borderRadius: 30,
+          },
+        });
+        console.log('Storage Permission Granted.');
+      }
+    } catch (err) {
+      console.log('++++' + err);
+    }
+  }
+};
+
+const WorkStack = createStackNavigator();
 
 function WorkView(token, setToken) {
   const {t, i18n} = useTranslation();
@@ -52,7 +112,11 @@ function WorkView(token, setToken) {
         <WorkStack.Screen name="WorkIndex">
           {props => (
             <>
-              <Topbar title={'Classroom'} {...props} />
+              <Topbar
+                title={'Classroom'}
+                notSettings={[() => {}, '']}
+                {...props}
+              />
               <WorkIndex {...props} token={token} />
             </>
           )}
@@ -82,6 +146,18 @@ function WorkView(token, setToken) {
                         {...propss}
                       />
                       <EachWork {...propss} token={token} />
+                    </>
+                  )}
+                </WorkStack.Screen>
+                <WorkStack.Screen name="EachWorkTeacher">
+                  {propss => (
+                    <>
+                      <Topbar
+                        title="Classwork"
+                        goback={() => props.navigation.navigate('WorkView')}
+                        {...propss}
+                      />
+                      <EachWorkTeacher {...propss} token={token} />
                     </>
                   )}
                 </WorkStack.Screen>
@@ -263,7 +339,8 @@ const Work = ({token, ...props}) => {
         </View>
         <ScrollView
           contentContainerStyle={{
-            justifyContent: classWork.data?.length === 0 ? 'center' : 'flex-start',
+            justifyContent:
+              classWork.data?.length === 0 ? 'center' : 'flex-start',
             minHeight: hp(60),
             marginBottom: 16,
           }}>
@@ -280,7 +357,10 @@ const Work = ({token, ...props}) => {
                   alignItems: 'center',
                 }}
                 onPress={() => {
-                  props.navigation.navigate('EachWork', {id: e.id});
+                  props.navigation.navigate(
+                    'EachWork' + (classWork.editable ? 'Teacher' : ''),
+                    {id: e.id},
+                  );
                 }}>
                 <Feather
                   name={e.type === 'assignment' ? 'clipboard' : 'book'}
@@ -628,70 +708,6 @@ const EachWork = ({token, id, ...props}) => {
       .catch(err => console.log(err));
   };
 
-  const downloadFile = async url => {
-    const getFileExtention = fileUrl => {
-      // To get the file extension
-      return /[.]/.exec(fileUrl) ? /[^.]+$/.exec(fileUrl) : undefined;
-    };
-
-    const _downloadFile = () => {
-      let date = new Date();
-      let FILE_URL = 'http://' + ip + '/media/' + url;
-      let file_ext = getFileExtention(FILE_URL);
-
-      file_ext = '.' + file_ext[0];
-
-      const {config, fs} = RNFetchBlob;
-      let RootDir = fs.dirs.PictureDir;
-      let options = {
-        fileCache: true,
-        addAndroidDownloads: {
-          path:
-            RootDir +
-            '/yuan_' +
-            Math.floor(date.getTime() + date.getSeconds() / 2) +
-            file_ext,
-          description: 'downloading file...',
-          notification: true,
-          useDownloadManager: true,
-        },
-      };
-      config(options)
-        .fetch('GET', FILE_URL)
-        .then(res => {
-          console.log('res -> ', JSON.stringify(res));
-        });
-    };
-
-    if (Platform.OS === 'ios') {
-      downloadFile();
-    } else {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: 'Storage Permission Required',
-            message:
-              'Application needs access to your storage to download File',
-          },
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          _downloadFile();
-          Toast.show('Downloading file...', {
-            containerStyle: {
-              backgroundColor: 'rgba(0, 0, 0, .5)',
-              paddingHorizontal: 20,
-              borderRadius: 30,
-            },
-          });
-          console.log('Storage Permission Granted.');
-        }
-      } catch (err) {
-        console.log('++++' + err);
-      }
-    }
-  };
-
   useEffect(() => {
     fetchWorkDetails().then(res => {
       if (res) {
@@ -705,7 +721,6 @@ const EachWork = ({token, id, ...props}) => {
         const attachments = res.attachment ? JSON.parse(res.attachment) : null;
         if (attachments && attachments.length > 0) {
           setAttachment(attachments);
-          setSubmitted(true);
         }
       }
     });
@@ -796,10 +811,16 @@ const EachWork = ({token, id, ...props}) => {
         <View
           style={{
             paddingHorizontal: 20,
-            marginBottom: 20,
+            marginBottom:
+              workDetails.type === 'assignment' && workDetails.isStudent
+                ? hp(28)
+                : 20,
           }}>
           {attachment?.map((e, i) => (
-            <View
+            <Pressable
+              onPress={() =>
+                Linking.openURL('http://' + ip + '/media/' + e.path)
+              }
               style={{
                 paddingVertical: 8,
                 paddingHorizontal: 15,
@@ -823,16 +844,15 @@ const EachWork = ({token, id, ...props}) => {
               </Text>
               <Pressable
                 onPress={() => {
-                  console.log(e);
                   downloadFile(e.path);
                 }}>
                 <MaterialIcon name="download" size={wp(4.6)} />
               </Pressable>
-            </View>
+            </Pressable>
           ))}
         </View>
       </ScrollView>
-      {workDetails.type === 'assignment' ? (
+      {workDetails.type === 'assignment' && workDetails.isStudent ? (
         <SlidingUpPanel
           ref={slidePanel}
           backdropOpacity={0}
@@ -1080,6 +1100,7 @@ const AddWork = props => {
               setIsError(false);
             }}
             labelTextStyle={{fontFamily: 'Poppins-Medium', paddingTop: 3}}
+            style={{fontFamily: 'Poppins-Medium'}}
           />
           <OutlinedTextField
             label={t('common:description')}
@@ -1089,6 +1110,7 @@ const AddWork = props => {
             onChangeText={t => setDescription(t)}
             labelTextStyle={{fontFamily: 'Poppins-Medium', paddingTop: 3}}
             multiline
+            style={{fontFamily: 'Poppins-Medium'}}
           />
           <View style={{paddingBottom: 180, marginTop: 30}}>
             <View style={{marginBottom: 10}}>
@@ -1176,6 +1198,99 @@ const AddWork = props => {
         </AnimatedLoader>
       </View>
     </>
+  );
+};
+
+const Tab = createMaterialTopTabNavigator();
+
+const StudentsWork = props => {
+  const [works, setWorks] = useState([]);
+
+  useEffect(() => {
+    axios({
+      url: `http://${ip}/api/v1/classroom/fetch-students-work/${props.route.params.id}`,
+      headers: {
+        authorization: 'Token ' + props.token,
+      },
+    })
+      .then(res => setWorks(res.data))
+      .catch(err => console.log(err));
+  }, []);
+
+  return (
+    <View style={{width: '100%', height: hp(100), backgroundColor: 'white'}}>
+      {works?.map(({user, files}) => (
+        <View style={{padding: 20}}>
+          <Text
+            style={{
+              fontSize: wp(4.2),
+              paddingTop: 10,
+              paddingBottom: 10,
+              fontFamily: 'Poppins-Regular',
+              color: '#999999',
+            }}>
+            {user}
+          </Text>
+          {files?.map((e, i) => (
+            <Pressable
+              onPress={() =>
+                Linking.openURL('http://' + ip + '/media/' + e.path)
+              }
+              style={{
+                paddingVertical: 8,
+                paddingHorizontal: 15,
+                borderWidth: 1,
+                borderColor: 'rgba(0, 0, 0, 0.1)',
+                borderRadius: 30,
+                marginBottom: 5,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}>
+              <Text
+                numberOfLines={1}
+                style={{
+                  fontFamily: 'Poppins-Medium',
+                  color: '#333333',
+                  lineHeight: wp(5),
+                  maxWidth: '90%',
+                }}>
+                {e.name}
+              </Text>
+              <Pressable
+                onPress={() => {
+                  downloadFile(e.path);
+                }}>
+                <MaterialIcon name="download" size={wp(4.6)} />
+              </Pressable>
+            </Pressable>
+          ))}
+        </View>
+      ))}
+    </View>
+  );
+};
+
+const EachWorkTeacher = props => {
+  const {t, i18n} = useTranslation();
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        tabBarIndicatorStyle: {backgroundColor: '#e64d00'},
+        tabBarLabelStyle: {
+          fontFamily: 'Poppins-SemiBold',
+          paddingTop: 3,
+          textTransform: 'none',
+          fontSize: wp(3.2),
+        },
+      }}>
+      <Tab.Screen name={t('common:descriptions')}>
+        {propss => <EachWork {...propss} {...props} />}
+      </Tab.Screen>
+      <Tab.Screen name={t('common:studentWorks')}>
+        {propss => <StudentsWork {...propss} {...props} />}
+      </Tab.Screen>
+    </Tab.Navigator>
   );
 };
 

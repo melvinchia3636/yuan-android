@@ -37,6 +37,7 @@ import WorkView from './Work';
 import ProfileView from './Profile.js';
 import {ip} from './constant';
 import {useTranslation} from 'react-i18next';
+import Topbar from './Topbar';
 
 const FadeInView = props => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -199,11 +200,37 @@ const LoginView = props => {
   );
 };
 
+const PayView = () => {
+  return (
+    <>
+      <Topbar title="Pay" />
+      <View style={{width: '100%', height: '90%', padding: 20}}>
+        <Image
+          source={{
+            uri:
+              'http://' +
+              ip +
+              '/static/980aadbd-a2d9-4661-b838-ede65a599ca5.jpeg',
+          }}
+          style={{
+            flex: 1,
+            width: null,
+            height: null,
+            resizeMode: 'contain',
+            borderRadius: 10,
+          }}
+        />
+      </View>
+    </>
+  );
+};
+
 const TabNav = [
   ['Profile', ProfileView, 'account-outline'],
   ['Work', WorkView, 'notebook-outline'],
   ['Comment', CommentView, 'calendar-month'],
   ['Chat', ChatView, 'comment-text-multiple-outline'],
+  ['Pay', PayView, 'credit-card-outline'],
 ];
 
 const bottomTabNavigator = (token, setToken) =>

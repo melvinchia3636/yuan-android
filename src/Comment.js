@@ -2,8 +2,16 @@
 import React, {useEffect, useState, useRef} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
+import SlidingUpPanel from 'rn-sliding-up-panel';
+import {OutlinedTextField} from 'rn-material-ui-textfield';
+import Toast from 'react-native-tiny-toast';
+import DocumentPicker from 'react-native-document-picker';
+import AnimatedLoader from 'react-native-animated-loader';
+import DatePicker from 'react-native-date-picker';
+import DropDownPicker from 'react-native-dropdown-picker';
+
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import FeatherIcons from 'react-native-vector-icons/Feather';
+import Feather from 'react-native-vector-icons/Feather';
 import {
   Text,
   View,
@@ -16,7 +24,10 @@ import {
 } from 'react-native';
 import styles from './styles';
 import axios from 'axios';
-import {widthPercentageToDP as wp} from 'react-native-responsive-screen';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 
 import SettingsView from './Settings';
 import Topbar from './Topbar';
@@ -50,7 +61,6 @@ function CommentView(token, setToken) {
           <CommentStack.Screen name="Calendar">
             {props => (
               <>
-                <Topbar title="Calendar" />
                 <CalendarView {...props} setTitle={setTitle} token={token} />
               </>
             )}
@@ -71,6 +81,13 @@ function CommentView(token, setToken) {
               </>
             )}
           </CommentStack.Screen>
+          <CommentStack.Screen name="AddComment">
+            {props => (
+              <>
+                <AddComment {...props} token={token} />
+              </>
+            )}
+          </CommentStack.Screen>
         </CommentStack.Navigator>
       </NavigationContainer>
     </>
@@ -82,12 +99,20 @@ const CalendarView = props => {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [choosenDate, setChoosenDate] = useState(new Date());
   const [event, setEvent] = useState([]);
+  const panelRef = useRef();
+  const [panelHideToggle, setPanelHideToggle] = useState(false);
+  !panelHideToggle ? panelRef.current?.hide() : null;
+  const [comments, setComments] = useState(null);
+  const [editable, setEditable] = useState(false);
+
   React.useEffect(() => {
     getComments(new Date(new Date().getFullYear(), month, 1), props.token).then(
-      r => setComments(r),
+      r => {
+        setComments(r.data);
+        setEditable(r.editable);
+      },
     );
   }, [month, props.token]);
-  const [comments, setComments] = useState(null);
 
   const fetchEvent = date => {
     const day = date.getDay() - 1 >= 0 ? date.getDay() - 1 : 6;
@@ -104,6 +129,20 @@ const CalendarView = props => {
 
   return (
     <>
+      <Topbar
+        title="Calendar"
+        notSettings={
+          editable
+            ? [
+                () => {
+                  panelRef.current.show();
+                  setPanelHideToggle(true);
+                },
+                'plus',
+              ]
+            : ''
+        }
+      />
       <ScrollView style={styles.commentView}>
         <View style={styles.monthContainer}>
           <Pressable style={{padding: 15}} onPress={() => setMonth(month - 1)}>
@@ -315,6 +354,133 @@ const CalendarView = props => {
           ))}
         </View>
       </ScrollView>
+      {editable ? (
+        <>
+          {panelHideToggle ? (
+            <Pressable
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: hp(100),
+                backgroundColor: 'black',
+                opacity: 0.4,
+              }}
+              onPress={() => {
+                panelRef.current?.hide();
+                setPanelHideToggle(false);
+              }}
+            />
+          ) : null}
+          <SlidingUpPanel
+            draggableRange={{top: hp(26), bottom: -200}}
+            allowDragging={false}
+            showBackdrop={false /*For making it modal-like*/}
+            ref={panelRef}
+            onBottomReached={() => setPanelHideToggle(false)}
+            friction={0.25}>
+            <View
+              style={{
+                backgroundColor: 'white',
+                width: wp(100),
+                height: hp(90),
+                borderRadius: 25,
+                elevation: 15,
+                paddingHorizontal: 28,
+                paddingVertical: 15,
+                borderWidth: 1,
+                borderColor: 'rgba(0, 0, 0, 0.08)',
+              }}>
+              <Text
+                style={{
+                  fontSize: wp(5.6),
+                  fontFamily: 'Poppins-Regular',
+                  color: '#363636',
+                  textAlign: 'center',
+                }}>
+                {t('common:titleCreate')}
+              </Text>
+              <View style={{marginTop: 20}}>
+                <Pressable
+                  onPress={() => {
+                    panelRef.current?.hide();
+                    setPanelHideToggle(false);
+                    setTimeout(() => {
+                      props.navigation.navigate('AddComment');
+                    }, 120);
+                  }}
+                  style={{
+                    flexDirection: 'row',
+                  }}>
+                  <Feather name="message-square" size={24} color="#363636" />
+                  <Text
+                    style={{
+                      fontFamily: 'Poppins-Medium',
+                      color: '#363636',
+                      fontSize: wp(4),
+                      marginLeft: 10,
+                    }}>
+                    {t('common:btnComment')}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    panelRef.current?.hide();
+                    setPanelHideToggle(false);
+                    setTimeout(() => {
+                      props.navigation.navigate('AddWork', {
+                        classroom: classroom.id,
+                        type: 'assignment',
+                      });
+                    }, 100);
+                  }}
+                  style={{
+                    flexDirection: 'row',
+                    marginTop: 20,
+                  }}>
+                  <Feather name="calendar" size={24} color="#363636" />
+                  <Text
+                    style={{
+                      fontFamily: 'Poppins-Medium',
+                      color: '#363636',
+                      fontSize: wp(4),
+                      marginLeft: 10,
+                    }}>
+                    {t('common:btnEvent')}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    panelRef.current?.hide();
+                    setPanelHideToggle(false);
+                    setTimeout(() => {
+                      props.navigation.navigate('AddWork', {
+                        classroom: classroom.id,
+                        type: 'assignment',
+                      });
+                    }, 100);
+                  }}
+                  style={{
+                    flexDirection: 'row',
+                    marginTop: 20,
+                  }}>
+                  <Feather name="bell" size={24} color="#363636" />
+                  <Text
+                    style={{
+                      fontFamily: 'Poppins-Medium',
+                      color: '#363636',
+                      fontSize: wp(4),
+                      marginLeft: 10,
+                    }}>
+                    {t('common:btnAnnouncement')}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          </SlidingUpPanel>
+        </>
+      ) : null}
     </>
   );
 };
@@ -541,7 +707,7 @@ const EachCommentView = props => {
           onChangeText={setMessage}
         />
         <Pressable onPress={sendReply} style={{marginLeft: 4, padding: 5}}>
-          <FeatherIcons
+          <Feather
             name="send"
             size={wp(6)}
             style={{transform: [{rotate: '45deg'}]}}
@@ -549,6 +715,283 @@ const EachCommentView = props => {
         </Pressable>
       </View>
     </ScrollView>
+  );
+};
+
+const AddComment = props => {
+  const [content, setContent] = useState('');
+  const [isError, setIsError] = useState(false);
+  const [attachment, setAttachment] = useState([]);
+  const [isLoading, setLoading] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [open, setOpen] = useState(false);
+  const [open2, setOpen2] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [studentChoice, setStudentChoice] = useState([]);
+  const {t, i18n} = useTranslation();
+
+  const submitContent = () => {
+    if (content.trim() && selectedStudent !== null) {
+      const body = new FormData();
+      const attachments = attachment.filter(e => e.type === 'new');
+
+      attachments.forEach(item => body.append('file[]', item.content));
+      body.append('content', content.trim());
+      body.append(
+        'date',
+        `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+      );
+      body.append('student', selectedStudent);
+
+      setLoading(true);
+      axios({
+        url: `http://${ip}/api/v1/comments/create-comment`,
+        method: 'POST',
+        headers: {
+          authorization: 'Token ' + props.token,
+        },
+        data: body,
+      })
+        .then(() => {
+          Toast.show('comment created successfully', {
+            containerStyle: {
+              backgroundColor: 'rgba(0, 0, 0, .5)',
+              paddingHorizontal: 20,
+              borderRadius: 30,
+            },
+          });
+          props.navigation.goBack();
+        })
+        .catch(err => console.log(err));
+    } else {
+      if (!content.trim()) {
+        setIsError(true);
+      }
+      if (selectedStudent === null) {
+        Toast.show('Please select a student', {
+          containerStyle: {
+            backgroundColor: 'rgba(0, 0, 0, .5)',
+            paddingHorizontal: 20,
+            borderRadius: 30,
+          },
+        });
+      }
+    }
+  };
+
+  const askForFile = async () => {
+    try {
+      const ress = await DocumentPicker.pickMultiple({
+        type: [DocumentPicker.types.allFiles],
+      });
+      const work = [];
+      for (let res of ress) {
+        if (!attachment.map(e => e.content.name).includes(res.name)) {
+          work.push({type: 'new', content: res});
+        }
+      }
+      setAttachment(attachment.concat(work));
+    } catch (err) {
+      if (DocumentPicker.isCancel(err)) {
+        console.log('error -----', err);
+      } else {
+      }
+    }
+  };
+
+  useEffect(() => {
+    axios({
+      url: `http://${ip}/api/v1/comments/fetch-students/${date.getFullYear()}-${
+        date.getMonth() + 1
+      }-${date.getDate()}`,
+      method: 'GET',
+      headers: {
+        Authorization: 'Token ' + props.token,
+      },
+    })
+      .then(res => {
+        setSelectedStudent(null);
+        setStudentChoice(
+          res.data.map(([value, label]) => ({
+            label,
+            value,
+          })),
+        );
+      })
+      .catch(err => console.log(err));
+  }, [date]);
+
+  return (
+    <>
+      <Topbar
+        title={'addComment'}
+        goback={props.navigation.goBack}
+        {...props}
+        notSettings={[submitContent, 'send']}
+      />
+      <View style={{backgroundColor: 'white', height: hp(100)}}>
+        <ScrollView
+          style={{
+            paddingHorizontal: 20,
+            paddingVertical: 20,
+          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+            }}>
+            <OutlinedTextField
+              label={t('common:date')}
+              tintColor="#f64d00"
+              defaultValue={date.toLocaleDateString('zh-hanz')}
+              containerStyle={{marginTop: 10, width: '90%'}}
+              onChangeText={t => setDate(t)}
+              labelTextStyle={{fontFamily: 'Poppins-Medium', paddingTop: 3}}
+              editable={false}
+              style={{color: '#363636', fontFamily: 'Poppins-Medium'}}
+            />
+            <Pressable onPress={() => setOpen(true)}>
+              <Feather name="calendar" size={wp(6)} />
+            </Pressable>
+          </View>
+          <DatePicker
+            modal
+            open={open}
+            date={date}
+            textColor="#141414"
+            mode="date"
+            onConfirm={date => {
+              setOpen(false);
+              setDate(date);
+            }}
+            onCancel={() => {
+              setOpen(false);
+            }}
+          />
+          <DropDownPicker
+            open={open2}
+            value={selectedStudent}
+            items={studentChoice}
+            setOpen={setOpen2}
+            setValue={setSelectedStudent}
+            setItems={setStudentChoice}
+            placeholder={t('common:dropdownPlaceholder')}
+            style={{
+              borderColor: 'rgba(0, 0, 0, .38)',
+              marginTop: 9,
+              borderRadius: 4,
+            }}
+            containerStyle={{
+              width: '100%',
+            }}
+            textStyle={{
+              fontFamily: 'Poppins-Regular',
+              marginTop: 3,
+              fontSize: wp(3.6),
+            }}
+          />
+          <OutlinedTextField
+            label={t('common:content')}
+            tintColor="#f64d00"
+            characterRestriction={1000}
+            containerStyle={{marginTop: 18}}
+            onChangeText={t => {
+              setContent(t);
+              setIsError(false);
+            }}
+            error={isError ? 'Required' : ''}
+            labelTextStyle={{fontFamily: 'Poppins-Medium', paddingTop: 3}}
+            multiline
+            style={{fontFamily: 'Poppins-Regular', fontSize: wp(3.6)}}
+          />
+          <View style={{paddingBottom: 180, marginTop: 30}}>
+            <View style={{marginBottom: 10}}>
+              {attachment.map((e, i) => (
+                <Pressable
+                  style={{
+                    paddingVertical: 5,
+                    paddingHorizontal: 15,
+                    marginBottom: 5,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}>
+                  <Text
+                    numberOfLines={1}
+                    style={{
+                      fontFamily: 'Poppins-Medium',
+                      color: '#333333',
+                      lineHeight: wp(5),
+                      maxWidth: '90%',
+                    }}>
+                    {e.content.name}
+                  </Text>
+                  <Pressable
+                    onPress={() => {
+                      setAttachment(
+                        attachment.filter((_, index) => index !== i),
+                      );
+                    }}>
+                    <Feather name="x" size={18} color="#141414" />
+                  </Pressable>
+                </Pressable>
+              ))}
+            </View>
+            <Pressable
+              onPress={askForFile}
+              style={{
+                backgroundColor: 'white',
+                padding: 5,
+                paddingTop: 8,
+                borderRadius: 5,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderWidth: 1,
+                borderColor: 'rgba(0, 0, 0, 0.38)',
+              }}>
+              <Feather
+                name="paperclip"
+                style={{
+                  color: '#e64d00',
+                  marginTop: -3,
+                  marginRight: 5,
+                }}
+                size={wp(4.5)}
+              />
+              <Text
+                style={{
+                  color: '#e64d00',
+                  textAlign: 'center',
+                  fontFamily: 'Poppins-Medium',
+                  fontSize: wp(3.5),
+                }}>
+                {t('common:addAttachment')}
+              </Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+        <AnimatedLoader
+          visible={isLoading}
+          overlayColor="rgba(255,255,255,.9)"
+          source={require('./loader.json')}
+          animationStyle={{
+            width: 100,
+            height: 100,
+          }}
+          speed={1}>
+          <Text
+            style={{
+              fontFamily: 'Poppins-Regular',
+              fontSize: wp(4),
+            }}>
+            Uploading ...
+          </Text>
+        </AnimatedLoader>
+      </View>
+    </>
   );
 };
 
