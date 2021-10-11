@@ -21,6 +21,7 @@ import {
   TextInput,
   Keyboard,
   Linking,
+  Alert,
 } from 'react-native';
 import styles from './styles';
 import axios from 'axios';
@@ -50,6 +51,19 @@ const getComments = async (date, token) => {
   return JSON.parse(comments.data);
 };
 
+const getStudentsComment = async (date, token) => {
+  const comments = await axios({
+    url: `http://${ip}/api/v1/comments/fetch-students-comment/${date.getFullYear()}-${
+      date.getMonth() + 1
+    }-${date.getDate()}`,
+    method: 'GET',
+    headers: {
+      Authorization: 'Token ' + token,
+    },
+  }).catch(err => console.log(err));
+  return comments.data;
+};
+
 const CommentStack = createStackNavigator();
 
 function CommentView(token, setToken) {
@@ -68,8 +82,12 @@ function CommentView(token, setToken) {
           <CommentStack.Screen name="EachComment">
             {props => (
               <>
-                <Topbar title={title} goback={props.navigation.goBack} />
-                <EachCommentView {...props} setTitle={setTitle} token={token} />
+                <EachCommentView
+                  {...props}
+                  title={title}
+                  setTitle={setTitle}
+                  token={token}
+                />
               </>
             )}
           </CommentStack.Screen>
@@ -103,7 +121,16 @@ const CalendarView = props => {
   const [panelHideToggle, setPanelHideToggle] = useState(false);
   !panelHideToggle ? panelRef.current?.hide() : null;
   const [comments, setComments] = useState(null);
+  const [studentsComment, setStudentsComment] = useState([]);
   const [editable, setEditable] = useState(false);
+
+  React.useEffect(() => {
+    props.navigation.addListener('focus', () => {
+      getStudentsComment(choosenDate, props.token).then(r =>
+        setStudentsComment(r),
+      );
+    });
+  }, []);
 
   React.useEffect(() => {
     getComments(new Date(new Date().getFullYear(), month, 1), props.token).then(
@@ -112,7 +139,20 @@ const CalendarView = props => {
         setEditable(r.editable);
       },
     );
-  }, [month, props.token]);
+    if (editable) {
+      getStudentsComment(choosenDate, props.token).then(r =>
+        setStudentsComment(r),
+      );
+    }
+  }, [month, props.token, editable]);
+
+  React.useEffect(() => {
+    if (editable) {
+      getStudentsComment(choosenDate, props.token).then(r =>
+        setStudentsComment(r),
+      );
+    }
+  }, [choosenDate]);
 
   const fetchEvent = date => {
     const day = date.getDay() - 1 >= 0 ? date.getDay() - 1 : 6;
@@ -353,6 +393,92 @@ const CalendarView = props => {
             </View>
           ))}
         </View>
+        {editable ? (
+          <View
+            style={{
+              paddingBottom: 40,
+              marginHorizontal: 3,
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}>
+              <Text style={styles.homepageSectionHeader}>
+                {t('common:todayCommentTitle')}
+              </Text>
+            </View>
+            <View
+              style={{
+                ...styles.homepageSectionHeaderSeperator,
+              }}
+            />
+            {studentsComment?.map(({id, author, content, student, avatar}) => (
+              <Pressable
+                onPress={() =>
+                  props.navigation.navigate('EachComment', {
+                    id,
+                    choosenDate: choosenDate.toDateString(),
+                  })
+                }
+                style={{
+                  width: '100%',
+                  padding: 10,
+                  elevation: 2,
+                  borderRadius: 6,
+                  backgroundColor: 'white',
+                  marginBottom: 10,
+                }}>
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <View
+                    style={{
+                      borderRadius: 100,
+                      elevation: 1,
+                      background: 'white',
+                    }}>
+                    <Image
+                      source={{uri: 'http://' + ip + avatar}}
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 100,
+                      }}
+                    />
+                  </View>
+                  <Text
+                    style={{
+                      fontFamily: 'Poppins-Medium',
+                      color: '#141414',
+                      padddingTop: 3,
+                      marginLeft: 10,
+                      fontSize: wp(4),
+                    }}>
+                    {student}
+                  </Text>
+                </View>
+                <Text
+                  style={{
+                    fontFamily: 'Poppins-Medium',
+                    color: '#141414',
+                    padddingTop: 3,
+                    marginTop: 10,
+                    fontSize: wp(3),
+                  }}>
+                  {content}
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: 'Poppins-Medium',
+                    textAlign: 'right',
+                    fontSize: wp(3),
+                  }}>
+                  - {author}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
       </ScrollView>
       {editable ? (
         <>
@@ -508,7 +634,9 @@ const EachCommentView = props => {
 
   const updateReplies = data => {
     axios({
-      url: `http://${ip}/api/v1/comments/fetch-replies/auto/${data.id}`,
+      url: `http://${ip}/api/v1/comments/fetch-replies/${
+        props.route.params.id || 'auto'
+      }/${data.id}`,
       method: 'GET',
       headers: {
         Authorization: 'Token ' + props.token,
@@ -557,9 +685,9 @@ const EachCommentView = props => {
       },
     );
     axios({
-      url: `http://${ip}/api/v1/comments/fetch-comment/auto/${date.getFullYear()}/${
-        date.getMonth() + 1
-      }/${date.getDate()}`,
+      url: `http://${ip}/api/v1/comments/fetch-comment/${
+        props.route.params.id || 'auto'
+      }/${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`,
       method: 'GET',
       headers: {
         Authorization: 'Token ' + props.token,
@@ -600,121 +728,153 @@ const EachCommentView = props => {
     );
   };
 
+  const deleteComment = () => {
+    Alert.alert(
+      'Are your sure?',
+      'Are you sure you want to delete this comment?',
+      [
+        // The "Yes" button
+        {
+          text: 'Yes',
+          onPress: () => {
+            axios({
+              url: `http://${ip}/api/v1/comments/delete-comment/${comment.id}`,
+              method: 'POST',
+              headers: {
+                authorization: 'Token ' + props.token,
+              },
+            }).then(() => props.navigation.navigate('Calendar'));
+          },
+        },
+        {
+          text: 'No',
+        },
+      ],
+    );
+  };
+
   return (
-    <ScrollView
-      style={{
-        paddingHorizontal: wp(6),
-        paddingTop: wp(6),
-      }}
-      ref={scrollViewRef}
-      contentContainerStyle={{flexDirection: 'column'}}>
-      <View style={{flexDirection: 'row'}}>
-        <Text
-          style={{
-            fontSize: wp(16),
-            fontFamily: 'Poppins-Regular',
-            marginTop: -wp(5),
-            marginRight: 10,
-          }}>
-          “
-        </Text>
-        <Text
-          style={{
-            fontSize: wp(4),
-            fontFamily: 'Poppins-Regular',
-            width: wp(78),
-            color: 'black',
-            marginBottom: wp(8),
-          }}>
-          {formatURL(comment.content)}
-        </Text>
-      </View>
-      <View>
-        <Text
-          style={{
-            color: 'black',
-            fontSize: wp(6),
-            fontFamily: 'Poppins-Medium',
-          }}>
-          {t('common:replyTitle')}
-        </Text>
-        <Text
-          style={{
-            fontFamily: 'Poppins-Medium',
-            color: '#888888',
-            marginBottom: 20,
-          }}>
-          {replies.count || 0} {t('common:replyCount')}
-        </Text>
-        <View style={{marginBottom: wp(4)}}>
-          {replies.content
-            ? replies.content.map(e => (
-                <View
-                  style={{flexDirection: 'row', marginBottom: 20}}
-                  key={e.id}>
-                  <Image
-                    style={{
-                      width: wp(12),
-                      height: wp(12),
-                      borderRadius: 100,
-                      marginRight: 10,
-                      marginTop: 5,
-                    }}
-                    source={{
-                      uri: 'http://' + ip + e.avatar,
-                    }}
-                  />
-                  <View style={{width: '84%'}}>
-                    <Text
-                      style={{
-                        fontFamily: 'Poppins-Medium',
-                      }}>
-                      {e.author}
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: 'Poppins-Regular',
-                        color: '#141414',
-                      }}>
-                      {e.content}
-                    </Text>
-                  </View>
-                </View>
-              ))
-            : null}
-        </View>
-      </View>
-      <View
+    <>
+      <Topbar
+        title={props.title}
+        goback={props.navigation.goBack}
+        notSettings={[() => deleteComment(), 'delete']}
+      />
+      <ScrollView
         style={{
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginBottom: wp(12),
-        }}>
-        <TextInput
+          paddingHorizontal: wp(6),
+          paddingTop: wp(6),
+        }}
+        ref={scrollViewRef}
+        contentContainerStyle={{flexDirection: 'column'}}>
+        <View style={{flexDirection: 'row'}}>
+          <Text
+            style={{
+              fontSize: wp(16),
+              fontFamily: 'Poppins-Regular',
+              marginTop: -wp(5),
+              marginRight: 10,
+            }}>
+            “
+          </Text>
+          <Text
+            style={{
+              fontSize: wp(4),
+              fontFamily: 'Poppins-Regular',
+              width: wp(78),
+              color: 'black',
+              marginBottom: wp(8),
+            }}>
+            {formatURL(comment.content)}
+          </Text>
+        </View>
+        <View>
+          <Text
+            style={{
+              color: 'black',
+              fontSize: wp(6),
+              fontFamily: 'Poppins-Medium',
+            }}>
+            {t('common:replyTitle')}
+          </Text>
+          <Text
+            style={{
+              fontFamily: 'Poppins-Medium',
+              color: '#888888',
+              marginBottom: 20,
+            }}>
+            {replies.count || 0} {t('common:replyCount')}
+          </Text>
+          <View style={{marginBottom: wp(4)}}>
+            {replies.content
+              ? replies.content.map(e => (
+                  <View
+                    style={{flexDirection: 'row', marginBottom: 20}}
+                    key={e.id}>
+                    <Image
+                      style={{
+                        width: wp(12),
+                        height: wp(12),
+                        borderRadius: 100,
+                        marginRight: 10,
+                        marginTop: 5,
+                      }}
+                      source={{
+                        uri: 'http://' + ip + e.avatar,
+                      }}
+                    />
+                    <View style={{width: '84%'}}>
+                      <Text
+                        style={{
+                          fontFamily: 'Poppins-Medium',
+                        }}>
+                        {e.author}
+                      </Text>
+                      <Text
+                        style={{
+                          fontFamily: 'Poppins-Regular',
+                          color: '#141414',
+                        }}>
+                        {e.content}
+                      </Text>
+                    </View>
+                  </View>
+                ))
+              : null}
+          </View>
+        </View>
+        <View
           style={{
-            backgroundColor: 'white',
-            color: '#141414',
-            paddingBottom: 8,
-            paddingHorizontal: 20,
-            fontFamily: 'Poppins-Regular',
-            borderRadius: 100,
-            width: '90%',
-          }}
-          placeholderTextColor="#999999"
-          placeholder={t('common:typeReply')}
-          value={message}
-          onChangeText={setMessage}
-        />
-        <Pressable onPress={sendReply} style={{marginLeft: 4, padding: 5}}>
-          <Feather
-            name="send"
-            size={wp(6)}
-            style={{transform: [{rotate: '45deg'}]}}
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: wp(12),
+          }}>
+          <TextInput
+            style={{
+              backgroundColor: 'white',
+              color: '#141414',
+              paddingBottom: 8,
+              paddingHorizontal: 20,
+              fontFamily: 'Poppins-Regular',
+              borderRadius: 100,
+              width: '90%',
+            }}
+            placeholderTextColor="#999999"
+            placeholder={t('common:typeReply')}
+            value={message}
+            onChangeText={setMessage}
           />
-        </Pressable>
-      </View>
-    </ScrollView>
+          <Pressable onPress={sendReply} style={{marginLeft: 4, padding: 5}}>
+            <Feather
+              name="send"
+              size={wp(6)}
+              style={{transform: [{rotate: '45deg'}]}}
+            />
+          </Pressable>
+        </View>
+      </ScrollView>
+    </>
   );
 };
 
@@ -760,7 +920,7 @@ const AddComment = props => {
               borderRadius: 30,
             },
           });
-          props.navigation.goBack();
+          props.navigation.navigate('Calendar');
         })
         .catch(err => console.log(err));
     } else {

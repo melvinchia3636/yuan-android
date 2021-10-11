@@ -91,6 +91,7 @@ function ChatView(token, setToken, navprops) {
 
 const ChatIndex = props => {
   const [chatRoom, setChatRoom] = useState([]);
+  const {t} = useTranslation();
   const fetchChatRoom = () => {
     axios({
       url: `http://${ip}/api/v1/chat/fetch-chatroom`,
@@ -160,7 +161,9 @@ const ChatIndex = props => {
                 }}
                 ellipsizeMode="tail"
                 numberOfLines={1}>
-                {e.last_message ? e.last_message.content : 'New Contact'}
+                {e.last_message
+                  ? e.last_message.content
+                  : t('common:newContact')}
               </Text>
             </View>
           </View>

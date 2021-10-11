@@ -66,4 +66,5 @@ export default {
   descriptions: '作业信息',
   studentWorks: '已交作业',
   payTitle: '學費',
+  newContact: '新联系人',
 };

@@ -66,4 +66,5 @@ export default {
   descriptions: 'Descriptions',
   studentWorks: 'Student Works',
   payTitle: 'Payment',
+  newContact: 'New Contact',
 };
