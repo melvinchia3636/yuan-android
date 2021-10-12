@@ -1,13 +1,17 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {View, Image, Text, ScrollView, Pressable} from 'react-native';
+import {View, Image, Text, ScrollView, Pressable, Alert} from 'react-native';
 import axios from 'axios';
 
 import SettingsView from './Settings';
 import Topbar from './Topbar';
 import styles from './styles';
 import {ip} from './constant';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
@@ -54,27 +58,28 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
   const [data, setData] = useState(null);
   const {t, i18n} = useTranslation();
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const response = await axios({
-        method: 'GET',
-        url: `http://${ip}/api/v1/user/fetch-user`,
-        headers: {
-          Authorization: 'Token ' + token,
-        },
-      }).catch(async () => {
-        await AsyncStorage.removeItem('@auth_token');
-        setToken(null);
-      });
-      if (response) {
-        setData(response.data);
-      }
-    };
-
-    if (!data) {
-      fetchUserData();
+  const fetchUserData = async () => {
+    const response = await axios({
+      method: 'GET',
+      url: `http://${ip}/api/v1/user/fetch-user`,
+      headers: {
+        Authorization: 'Token ' + token,
+      },
+    }).catch(async () => {
+      await AsyncStorage.removeItem('@auth_token');
+      setToken(null);
+    });
+    if (response) {
+      setData(response.data);
     }
-  }, [token, data, setToken]);
+  };
+
+  useEffect(() => {
+    fetchUserData();
+    props.navigation.addListener('focus', () => {
+      fetchUserData;
+    });
+  }, []);
 
   return (
     <>
@@ -97,19 +102,64 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
                 {t('common:hello')}
               </Text>
               <View style={styles.homepageSectionHeaderSeperator} />
-              {data && data.event.length ? (
-                data.event.map(e => (
-                  <View style={{marginBottom: 30}}>
-                    <Text style={styles.homepageSectionContent}>
-                      {e.class_name}
-                    </Text>
-                    <Text style={styles.homepageSectionContentSub}>
-                      {e.start} - {e.end}
-                    </Text>
-                  </View>
-                ))
+              {data?.event?.class?.length > 0 ||
+              data?.event?.activity?.length > 0 ? (
+                <View
+                  style={{
+                    marginBottom: 20,
+                  }}>
+                  {data?.event.class?.map(e => (
+                    <View
+                      style={{
+                        marginBottom: 20,
+                      }}>
+                      <Text
+                        style={{
+                          fontFamily: 'Poppins-Medium',
+                          fontSize: wp(6),
+                        }}>
+                        {e.start} - {e.end}
+                      </Text>
+                      <Text
+                        style={{
+                          fontFamily: 'Poppins-Medium',
+                          fontSize: wp(4),
+                          color: '#141414',
+                        }}>
+                        {e.class_name}
+                      </Text>
+                    </View>
+                  ))}
+                  {data?.event.activity?.map(e => (
+                    <View
+                      style={{
+                        marginBottom: 20,
+                      }}>
+                      <Text
+                        style={{
+                          fontFamily: 'Poppins-Medium',
+                          fontSize: wp(6),
+                        }}>
+                        {e.start_time.split(':').slice(0, 2).join(':')} -{' '}
+                        {e.end_time.split(':').slice(0, 2).join(':')}
+                      </Text>
+                      <Text
+                        style={{
+                          fontFamily: 'Poppins-Medium',
+                          color: '#141414',
+                        }}>
+                        {e.content}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
               ) : (
-                <Text style={styles.homepageComment}>
+                <Text
+                  style={{
+                    color: '#141414',
+                    fontFamily: 'Poppins-Regular',
+                    marginBottom: 20,
+                  }}>
                   {t('common:noEvent')}
                 </Text>
               )}

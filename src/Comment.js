@@ -12,6 +12,8 @@ import DropDownPicker from 'react-native-dropdown-picker';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import {
   Text,
   View,
@@ -34,6 +36,7 @@ import SettingsView from './Settings';
 import Topbar from './Topbar';
 import {ip} from './constant';
 import {useTranslation} from 'react-i18next';
+import {downloadFile} from './Work';
 
 require('intl'); // import intl object
 require('intl/locale-data/jsonp/en-IN'); // load the required locale details
@@ -106,6 +109,13 @@ function CommentView(token, setToken) {
               </>
             )}
           </CommentStack.Screen>
+          <CommentStack.Screen name="AddEvent">
+            {props => (
+              <>
+                <AddEvent {...props} token={token} />
+              </>
+            )}
+          </CommentStack.Screen>
         </CommentStack.Navigator>
       </NavigationContainer>
     </>
@@ -126,6 +136,7 @@ const CalendarView = props => {
 
   React.useEffect(() => {
     props.navigation.addListener('focus', () => {
+      fetchEvent(choosenDate);
       getStudentsComment(choosenDate, props.token).then(r =>
         setStudentsComment(r),
       );
@@ -157,7 +168,9 @@ const CalendarView = props => {
   const fetchEvent = date => {
     const day = date.getDay() - 1 >= 0 ? date.getDay() - 1 : 6;
     axios({
-      url: `http://${ip}/api/v1/events/fetch-event/${day}`,
+      url: `http://${ip}/api/v1/events/fetch-event/${date.getFullYear()}-${
+        date.getMonth() + 1
+      }-${date.getDate()}`,
       method: 'GET',
       headers: {
         Authorization: 'Token ' + props.token,
@@ -367,32 +380,77 @@ const CalendarView = props => {
         ) : null}
         <View
           style={{
-            marginBottom: 20,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}>
-          {event.map(e => (
-            <View
-              style={{
-                marginBottom: 10,
-                marginTop: 20,
-              }}>
-              <Text
-                style={{
-                  fontFamily: 'Poppins-Medium',
-                  fontSize: wp(6),
-                }}>
-                {e.start} - {e.end}
-              </Text>
-              <Text
-                style={{
-                  fontFamily: 'Poppins-Medium',
-                  fontSize: wp(4),
-                  color: '#141414',
-                }}>
-                {e.class_name}
-              </Text>
-            </View>
-          ))}
+          <Text style={styles.homepageSectionHeader}>{t('common:hello')}</Text>
         </View>
+        <View
+          style={{
+            ...styles.homepageSectionHeaderSeperator,
+          }}
+        />
+        {event?.class?.length > 0 || event?.activity?.length > 0 ? (
+          <View
+            style={{
+              marginBottom: 20,
+            }}>
+            {event.class?.map(e => (
+              <View
+                style={{
+                  marginBottom: 20,
+                }}>
+                <Text
+                  style={{
+                    fontFamily: 'Poppins-Medium',
+                    fontSize: wp(6),
+                  }}>
+                  {e.start} - {e.end}
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: 'Poppins-Medium',
+                    fontSize: wp(4),
+                    color: '#141414',
+                  }}>
+                  {e.class_name}
+                </Text>
+              </View>
+            ))}
+            {event.activity?.map(e => (
+              <View
+                style={{
+                  marginBottom: 20,
+                }}>
+                <Text
+                  style={{
+                    fontFamily: 'Poppins-Medium',
+                    fontSize: wp(6),
+                  }}>
+                  {e.start_time.split(':').slice(0, 2).join(':')} -{' '}
+                  {e.end_time.split(':').slice(0, 2).join(':')}
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: 'Poppins-Medium',
+                    color: '#141414',
+                  }}>
+                  {e.content}
+                </Text>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <Text
+            style={{
+              color: '#141414',
+              fontFamily: 'Poppins-Regular',
+              marginBottom: 20,
+            }}>
+            {t('common:noEvent')}
+          </Text>
+        )}
         {editable ? (
           <View
             style={{
@@ -414,69 +472,75 @@ const CalendarView = props => {
                 ...styles.homepageSectionHeaderSeperator,
               }}
             />
-            {studentsComment?.map(({id, author, content, student, avatar}) => (
-              <Pressable
-                onPress={() =>
-                  props.navigation.navigate('EachComment', {
-                    id,
-                    choosenDate: choosenDate.toDateString(),
-                  })
-                }
-                style={{
-                  width: '100%',
-                  padding: 10,
-                  elevation: 2,
-                  borderRadius: 6,
-                  backgroundColor: 'white',
-                  marginBottom: 10,
-                }}>
-                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                  <View
-                    style={{
-                      borderRadius: 100,
-                      elevation: 1,
-                      background: 'white',
-                    }}>
-                    <Image
-                      source={{uri: 'http://' + ip + avatar}}
+            {studentsComment.length ? (
+              studentsComment.map(({id, author, content, student, avatar}) => (
+                <Pressable
+                  onPress={() =>
+                    props.navigation.navigate('EachComment', {
+                      id,
+                      choosenDate: choosenDate.toDateString(),
+                    })
+                  }
+                  style={{
+                    width: '100%',
+                    padding: 10,
+                    elevation: 2,
+                    borderRadius: 6,
+                    backgroundColor: 'white',
+                    marginBottom: 10,
+                  }}>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <View
                       style={{
-                        width: 32,
-                        height: 32,
                         borderRadius: 100,
-                      }}
-                    />
+                        elevation: 1,
+                        background: 'white',
+                      }}>
+                      <Image
+                        source={{uri: 'http://' + ip + avatar}}
+                        style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 100,
+                        }}
+                      />
+                    </View>
+                    <Text
+                      style={{
+                        fontFamily: 'Poppins-Medium',
+                        color: '#141414',
+                        padddingTop: 3,
+                        marginLeft: 10,
+                        fontSize: wp(4),
+                      }}>
+                      {student}
+                    </Text>
                   </View>
                   <Text
                     style={{
                       fontFamily: 'Poppins-Medium',
                       color: '#141414',
                       padddingTop: 3,
-                      marginLeft: 10,
-                      fontSize: wp(4),
+                      marginTop: 10,
+                      fontSize: wp(3),
                     }}>
-                    {student}
+                    {content}
                   </Text>
-                </View>
-                <Text
-                  style={{
-                    fontFamily: 'Poppins-Medium',
-                    color: '#141414',
-                    padddingTop: 3,
-                    marginTop: 10,
-                    fontSize: wp(3),
-                  }}>
-                  {content}
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: 'Poppins-Medium',
-                    textAlign: 'right',
-                    fontSize: wp(3),
-                  }}>
-                  - {author}
-                </Text>
-              </Pressable>
-            ))}
+                  <Text
+                    style={{
+                      fontFamily: 'Poppins-Medium',
+                      textAlign: 'right',
+                      fontSize: wp(3),
+                    }}>
+                    - {author}
+                  </Text>
+                </Pressable>
+              ))
+            ) : (
+              <Text style={{color: '#141414', fontFamily: 'Poppins-Regular'}}>
+                {t('common:noCommentCreated')}
+              </Text>
+            )}
           </View>
         ) : null}
       </ScrollView>
@@ -555,10 +619,7 @@ const CalendarView = props => {
                     panelRef.current?.hide();
                     setPanelHideToggle(false);
                     setTimeout(() => {
-                      props.navigation.navigate('AddWork', {
-                        classroom: classroom.id,
-                        type: 'assignment',
-                      });
+                      props.navigation.navigate('AddEvent');
                     }, 100);
                   }}
                   style={{
@@ -581,10 +642,7 @@ const CalendarView = props => {
                     panelRef.current?.hide();
                     setPanelHideToggle(false);
                     setTimeout(() => {
-                      props.navigation.navigate('AddWork', {
-                        classroom: classroom.id,
-                        type: 'assignment',
-                      });
+                      props.navigation.navigate('AddEvent');
                     }, 100);
                   }}
                   style={{
@@ -762,6 +820,7 @@ const EachCommentView = props => {
       />
       <ScrollView
         style={{
+          backgroundColor: 'white',
           paddingHorizontal: wp(6),
           paddingTop: wp(6),
         }}
@@ -787,6 +846,58 @@ const EachCommentView = props => {
             }}>
             {formatURL(comment.content)}
           </Text>
+        </View>
+        {comment.attachment ? (
+          <Text
+            style={{
+              fontSize: wp(4.2),
+              paddingBottom: 20,
+              fontFamily: 'Poppins-Regular',
+              color: '#999999',
+            }}>
+            {t('common:attachment')}
+          </Text>
+        ) : null}
+        <View
+          style={{
+            marginBottom: 20,
+          }}>
+          {comment.attachment
+            ? JSON.parse(comment.attachment).map((e, i) => (
+                <Pressable
+                  onPress={() =>
+                    Linking.openURL('http://' + ip + '/media/' + e.path)
+                  }
+                  style={{
+                    paddingVertical: 8,
+                    paddingHorizontal: 15,
+                    borderWidth: 1,
+                    borderColor: 'rgba(0, 0, 0, 0.1)',
+                    borderRadius: 30,
+                    marginBottom: 5,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}>
+                  <Text
+                    numberOfLines={1}
+                    style={{
+                      fontFamily: 'Poppins-Medium',
+                      color: '#333333',
+                      lineHeight: wp(5),
+                      maxWidth: '90%',
+                    }}>
+                    {e.name}
+                  </Text>
+                  <Pressable
+                    onPress={() => {
+                      downloadFile(e.path);
+                    }}>
+                    <MaterialIcon name="download" size={wp(4.6)} />
+                  </Pressable>
+                </Pressable>
+              ))
+            : null}
         </View>
         <View>
           <Text
@@ -852,7 +963,7 @@ const EachCommentView = props => {
           }}>
           <TextInput
             style={{
-              backgroundColor: 'white',
+              backgroundColor: '#f8f8f8',
               color: '#141414',
               paddingBottom: 8,
               paddingHorizontal: 20,
@@ -913,7 +1024,7 @@ const AddComment = props => {
         data: body,
       })
         .then(() => {
-          Toast.show('comment created successfully', {
+          Toast.show('Comment created successfully', {
             containerStyle: {
               backgroundColor: 'rgba(0, 0, 0, .5)',
               paddingHorizontal: 20,
@@ -1150,6 +1261,200 @@ const AddComment = props => {
             Uploading ...
           </Text>
         </AnimatedLoader>
+      </View>
+    </>
+  );
+};
+
+const AddEvent = props => {
+  const [content, setContent] = useState('');
+  const [isError, setIsError] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [startTime, setStartTime] = useState(new Date());
+  const [endTime, setEndTime] = useState(new Date());
+  const [open, setOpen] = useState(false);
+  const [open2, setOpen2] = useState(false);
+  const [open3, setOpen3] = useState(false);
+  const {t, i18n} = useTranslation();
+
+  const submitContent = () => {
+    if (content.trim()) {
+      axios({
+        url: `http://${ip}/api/v1/activity/create-activity`,
+        method: 'POST',
+        data: {
+          date: date.toDateString(),
+          startTime: startTime.toLocaleTimeString('en', {
+            hour12: false,
+            hour: 'numeric',
+            minute: 'numeric',
+          }),
+          endTime: endTime.toLocaleTimeString('en', {
+            hour12: false,
+            hour: 'numeric',
+            minute: 'numeric',
+          }),
+          content,
+        },
+        headers: {
+          authorization: 'Token ' + props.token,
+        },
+      })
+        .then(() => {
+          Toast.show('Event created successfully', {
+            containerStyle: {
+              backgroundColor: 'rgba(0, 0, 0, .5)',
+              paddingHorizontal: 20,
+              borderRadius: 30,
+            },
+          });
+          props.navigation.navigate('Calendar');
+        })
+        .catch(err => console.log(err));
+    } else {
+      if (!content.trim()) {
+        setIsError(true);
+      }
+    }
+  };
+
+  return (
+    <>
+      <Topbar
+        title={'addEvent'}
+        goback={props.navigation.goBack}
+        {...props}
+        notSettings={[submitContent, 'send']}
+      />
+      <View style={{backgroundColor: 'white', height: hp(100)}}>
+        <ScrollView
+          style={{
+            paddingHorizontal: 20,
+            paddingVertical: 20,
+          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+            }}>
+            <OutlinedTextField
+              label={t('common:date')}
+              tintColor="#f64d00"
+              defaultValue={date.toLocaleDateString('zh-hanz')}
+              containerStyle={{marginTop: 10, width: '90%'}}
+              labelTextStyle={{fontFamily: 'Poppins-Medium', paddingTop: 3}}
+              editable={false}
+              style={{color: '#363636', fontFamily: 'Poppins-Medium'}}
+            />
+            <Pressable onPress={() => setOpen(true)}>
+              <Feather name="calendar" size={wp(6)} />
+            </Pressable>
+          </View>
+          <DatePicker
+            modal
+            open={open}
+            date={date}
+            textColor="#141414"
+            mode="date"
+            onConfirm={date => {
+              setOpen(false);
+              setDate(date);
+            }}
+            onCancel={() => {
+              setOpen(false);
+            }}
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+            }}>
+            <OutlinedTextField
+              label={t('common:startTime')}
+              tintColor="#f64d00"
+              defaultValue={startTime.toLocaleTimeString('zh-hanz', {
+                minute: 'numeric',
+                hour: 'numeric',
+              })}
+              containerStyle={{marginTop: 10, width: '90%'}}
+              labelTextStyle={{fontFamily: 'Poppins-Medium', paddingTop: 3}}
+              editable={false}
+              style={{color: '#363636', fontFamily: 'Poppins-Medium'}}
+            />
+            <Pressable onPress={() => setOpen2(true)}>
+              <Feather name="clock" size={wp(6)} />
+            </Pressable>
+          </View>
+          <DatePicker
+            modal
+            open={open2}
+            date={startTime}
+            textColor="#141414"
+            mode="time"
+            onConfirm={time => {
+              setOpen2(false);
+              setStartTime(time);
+            }}
+            onCancel={() => {
+              setOpen2(false);
+            }}
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+            }}>
+            <OutlinedTextField
+              label={t('common:date')}
+              tintColor="#f64d00"
+              defaultValue={endTime.toLocaleTimeString('zh-hanz', {
+                minute: 'numeric',
+                hour: 'numeric',
+              })}
+              containerStyle={{marginTop: 10, width: '90%'}}
+              labelTextStyle={{fontFamily: 'Poppins-Medium', paddingTop: 3}}
+              editable={false}
+              style={{color: '#363636', fontFamily: 'Poppins-Medium'}}
+            />
+            <Pressable onPress={() => setOpen3(true)}>
+              <Feather name="clock" size={wp(6)} />
+            </Pressable>
+          </View>
+          <DatePicker
+            modal
+            open={open3}
+            date={endTime}
+            textColor="#141414"
+            mode="time"
+            onConfirm={time => {
+              setOpen3(false);
+              setEndTime(time);
+            }}
+            onCancel={() => {
+              setOpen3(false);
+            }}
+          />
+          <OutlinedTextField
+            label={t('common:eventDesc')}
+            tintColor="#f64d00"
+            characterRestriction={1000}
+            containerStyle={{marginTop: 18}}
+            onChangeText={t => {
+              setContent(t);
+              setIsError(false);
+            }}
+            error={isError ? 'Required' : ''}
+            labelTextStyle={{fontFamily: 'Poppins-Medium', paddingTop: 3}}
+            multiline
+            style={{fontFamily: 'Poppins-Regular', fontSize: wp(3.6)}}
+          />
+        </ScrollView>
       </View>
     </>
   );

@@ -67,4 +67,7 @@ export default {
   studentWorks: 'Kerja Pelajar',
   payTitle: 'Pembayaran',
   newContact: 'Kenalan Baru',
+  eventDesc: 'Kenalan untuk Aktiviti',
+  addeventTitle: 'Tambah Aktiviti',
+  noCommentCreated: '尚未创建任何评语',
 };

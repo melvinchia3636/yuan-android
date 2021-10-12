@@ -67,4 +67,7 @@ export default {
   studentWorks: 'Student Works',
   payTitle: 'Payment',
   newContact: 'New Contact',
+  eventDesc: 'Event Description',
+  addeventTitle: 'Add Event',
+  noCommentCreated: 'No comment was cre',
 };

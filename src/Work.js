@@ -1295,3 +1295,4 @@ const EachWorkTeacher = props => {
 };
 
 export default WorkView;
+export {downloadFile};

@@ -34,8 +34,8 @@ export default {
   login: '登录',
   comment_date: '{{day}} {{month}} {{year}}',
   typeReply: '在此输入您的回复',
-  todayCommentTitle: '今日留言',
-  noCommentToday: '今日没有留言',
+  todayCommentTitle: '今日评语',
+  noCommentToday: '今日没有评语',
   nothing: '没有作业',
   viewCommentBtn: '查看留言',
   replyTitle: '回复',
@@ -67,4 +67,7 @@ export default {
   studentWorks: '已交作业',
   payTitle: '學費',
   newContact: '新联系人',
+  eventDesc: '活动详情',
+  addeventTitle: '创建活动',
+  noCommentCreated: '尚未创建任何评语',
 };
