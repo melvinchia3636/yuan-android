@@ -70,4 +70,8 @@ export default {
   eventDesc: '活动详情',
   addeventTitle: '创建活动',
   noCommentCreated: '尚未创建任何评语',
+  startTime: '开始时间',
+  endTime: '结束时间',
+  announcementTitle: '公告标题',
+  announcementDesc: '公告内容',
 };

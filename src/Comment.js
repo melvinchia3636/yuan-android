@@ -116,6 +116,13 @@ function CommentView(token, setToken) {
               </>
             )}
           </CommentStack.Screen>
+          <CommentStack.Screen name="AddAnnouncement">
+            {props => (
+              <>
+                <AddAnnouncement {...props} token={token} />
+              </>
+            )}
+          </CommentStack.Screen>
         </CommentStack.Navigator>
       </NavigationContainer>
     </>
@@ -642,7 +649,7 @@ const CalendarView = props => {
                     panelRef.current?.hide();
                     setPanelHideToggle(false);
                     setTimeout(() => {
-                      props.navigation.navigate('AddEvent');
+                      props.navigation.navigate('AddAnnouncement');
                     }, 100);
                   }}
                   style={{
@@ -1266,6 +1273,169 @@ const AddComment = props => {
   );
 };
 
+const AddAnnouncement = props => {
+  const [content, setContent] = useState('');
+  const [isError, setIsError] = useState(false);
+  const [startTime, setStartTime] = useState(new Date());
+  const [endTime, setEndTime] = useState(new Date());
+  const [open2, setOpen2] = useState(false);
+  const [open3, setOpen3] = useState(false);
+  const [title, setTitle] = useState('');
+  const [isTitleError, setIsTitleError] = useState(false);
+  const {t, i18n} = useTranslation();
+
+  const submitContent = () => {
+    if (content.trim() && title.trim()) {
+      axios({
+        url: `http://${ip}/api/v1/announcement/create-announcement`,
+        method: 'POST',
+        data: {
+          startTime: startTime.toLocaleDateString('en'),
+          endTime: endTime.toLocaleDateString('en'),
+          title,
+          content,
+        },
+        headers: {
+          authorization: 'Token ' + props.token,
+        },
+      })
+        .then(() => {
+          Toast.show('Announcement created successfully', {
+            containerStyle: {
+              backgroundColor: 'rgba(0, 0, 0, .5)',
+              paddingHorizontal: 20,
+              borderRadius: 30,
+            },
+          });
+          props.navigation.navigate('Calendar');
+        })
+        .catch(err => console.log(err));
+    } else {
+      if (!content.trim()) {
+        setIsError(true);
+      }
+
+      if (!title.trim()) {
+        setIsTitleError(true);
+      }
+    }
+  };
+
+  return (
+    <>
+      <Topbar
+        title={'addEvent'}
+        goback={props.navigation.goBack}
+        {...props}
+        notSettings={[submitContent, 'send']}
+      />
+      <View style={{backgroundColor: 'white', height: hp(100)}}>
+        <ScrollView
+          style={{
+            paddingHorizontal: 20,
+            paddingVertical: 20,
+          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+            }}>
+            <OutlinedTextField
+              label={t('common:startTime')}
+              tintColor="#f64d00"
+              defaultValue={startTime.toLocaleDateString('zh-hanz')}
+              containerStyle={{marginTop: 10, width: '90%'}}
+              labelTextStyle={{fontFamily: 'Poppins-Medium', paddingTop: 3}}
+              editable={false}
+              style={{color: '#363636', fontFamily: 'Poppins-Medium'}}
+            />
+            <Pressable onPress={() => setOpen2(true)}>
+              <Feather name="clock" size={wp(6)} />
+            </Pressable>
+          </View>
+          <DatePicker
+            modal
+            open={open2}
+            date={startTime}
+            textColor="#141414"
+            mode="date"
+            onConfirm={time => {
+              setOpen2(false);
+              setStartTime(time);
+            }}
+            onCancel={() => {
+              setOpen2(false);
+            }}
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+            }}>
+            <OutlinedTextField
+              label={t('common:date')}
+              tintColor="#f64d00"
+              defaultValue={endTime.toLocaleDateString('zh-hanz')}
+              containerStyle={{marginTop: 10, width: '90%'}}
+              labelTextStyle={{fontFamily: 'Poppins-Medium', paddingTop: 3}}
+              editable={false}
+              style={{color: '#363636', fontFamily: 'Poppins-Medium'}}
+            />
+            <Pressable onPress={() => setOpen3(true)}>
+              <Feather name="clock" size={wp(6)} />
+            </Pressable>
+          </View>
+          <DatePicker
+            modal
+            open={open3}
+            date={endTime}
+            textColor="#141414"
+            mode="date"
+            onConfirm={time => {
+              setOpen3(false);
+              setEndTime(time);
+            }}
+            onCancel={() => {
+              setOpen3(false);
+            }}
+          />
+          <OutlinedTextField
+            label={t('common:announcementTitle')}
+            tintColor="#f64d00"
+            characterRestriction={200}
+            containerStyle={{marginTop: 18}}
+            onChangeText={t => {
+              setTitle(t);
+              setIsTitleError(false);
+            }}
+            error={isTitleError ? 'Required' : ''}
+            labelTextStyle={{fontFamily: 'Poppins-Medium', paddingTop: 3}}
+            style={{fontFamily: 'Poppins-Regular', fontSize: wp(3.6)}}
+          />
+          <OutlinedTextField
+            label={t('common:announcementDesc')}
+            tintColor="#f64d00"
+            characterRestriction={1000}
+            containerStyle={{marginTop: 18}}
+            onChangeText={t => {
+              setContent(t);
+              setIsError(false);
+            }}
+            error={isError ? 'Required' : ''}
+            labelTextStyle={{fontFamily: 'Poppins-Medium', paddingTop: 3}}
+            multiline
+            style={{fontFamily: 'Poppins-Regular', fontSize: wp(3.6)}}
+          />
+        </ScrollView>
+      </View>
+    </>
+  );
+};
+
 const AddEvent = props => {
   const [content, setContent] = useState('');
   const [isError, setIsError] = useState(false);
@@ -1411,7 +1581,7 @@ const AddEvent = props => {
               width: '100%',
             }}>
             <OutlinedTextField
-              label={t('common:date')}
+              label={t('common:endTime')}
               tintColor="#f64d00"
               defaultValue={endTime.toLocaleTimeString('zh-hanz', {
                 minute: 'numeric',

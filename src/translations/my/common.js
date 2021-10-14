@@ -70,4 +70,8 @@ export default {
   eventDesc: 'Kenalan untuk Aktiviti',
   addeventTitle: 'Tambah Aktiviti',
   noCommentCreated: '尚未创建任何评语',
+  startTime: 'Masa Mula',
+  endTime: 'Masa Tamat',
+  announcementDesc: 'Kandungan',
+  announcementTitle: 'Tajuk',
 };

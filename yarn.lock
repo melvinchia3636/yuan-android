@@ -7039,6 +7039,11 @@ react-native-datepicker@^1.7.2:
   dependencies:
     moment "^2.22.0"
 
+react-native-dialog@^9.1.2:
+  version "9.1.2"
+  resolved "https://registry.yarnpkg.com/react-native-dialog/-/react-native-dialog-9.1.2.tgz#15ba668f6b6937160cf4332399cce34ca6b4df1d"
+  integrity sha512-J3TfhvUIfBobSl4LF2sCa2pgXXvk7Ql0OKoBXwbJKAuiPa63WWSg4s0w1Zd3WhUQu/BbizwEXYrWLmizW2tizA==
+
 react-native-dialogbox@^0.6.10:
   version "0.6.10"
   resolved "https://registry.npmjs.org/react-native-dialogbox/-/react-native-dialogbox-0.6.10.tgz"
@@ -7102,6 +7107,13 @@ react-native-material-textfield@^0.16.1:
   integrity sha512-pcV/ic3i6vYEODS7pvAMUYJ+evkzIB8cjXtSzkab9rBtYNGRpAlM0Yp8QNnjZ7foZqkj9Ynav0nguWcuJST10A==
   dependencies:
     prop-types "^15.5.9"
+
+react-native-modalbox@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/react-native-modalbox/-/react-native-modalbox-2.0.2.tgz#8a7b3d2e7be79b5d1cb9530b2c6bc535b1bc8c66"
+  integrity sha512-uSuoZ+siPPNqWGyw8NXhA/Aots7mOx2+qijFoeovequY0kczZEPZDd0ARHbzg+1cE3H3AATJEwGdkVA8lUxs0g==
+  dependencies:
+    prop-types "^15.5.10"
 
 react-native-pager-view@^5.4.6:
   version "5.4.6"

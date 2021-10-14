@@ -69,5 +69,9 @@ export default {
   newContact: 'New Contact',
   eventDesc: 'Event Description',
   addeventTitle: 'Add Event',
-  noCommentCreated: 'No comment was cre',
+  noCommentCreated: 'No comment was created today',
+  startTime: 'Start Time',
+  endTime: 'End Time',
+  announcementDesc: 'Content',
+  announcementTitle: 'Title',
 };

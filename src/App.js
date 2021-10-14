@@ -13,7 +13,7 @@ import {
   Keyboard,
   Pressable,
   Linking,
-  Alert
+  Alert,
 } from 'react-native';
 import axios from 'axios';
 import './IMLocalize';
@@ -39,6 +39,8 @@ import ProfileView from './Profile.js';
 import {ip} from './constant';
 import {useTranslation} from 'react-i18next';
 import Topbar from './Topbar';
+import Dialog from 'react-native-dialog';
+import {ScrollView} from 'react-native-gesture-handler';
 
 const FadeInView = props => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -77,6 +79,49 @@ const LoadingView = props => {
   const fadeOut = useRef(new Animated.Value(1)).current;
   const [done, setDone] = useState(false);
 
+  const showAnnouncement = () => {
+    if (props.token) {
+      axios({
+        url: `http://${ip}/api/v1/announcement/fetch-announcement`,
+        method: 'GET',
+        headers: {
+          authorization: 'Token ' + props.token,
+        },
+      })
+        .then(res => {
+          console.log(res.data);
+          if (res.data.length) {
+            props.setVisible(true);
+            props.setContent(
+              res.data.map(({title, content}) => (
+                <>
+                  <Dialog.Description
+                    style={{
+                      color: '#141414',
+                      fontFamily: 'Poppins-Medium',
+                      fontSize: wp(4.6),
+                    }}>
+                    {title}
+                  </Dialog.Description>
+                  <Dialog.Description
+                    style={{
+                      color: '#141414',
+                      fontFamily: 'Poppins-Regular',
+                      fontSize: wp(3.6),
+                      marginTop: 0,
+                      marginBottom: 20,
+                    }}>
+                    {content}
+                  </Dialog.Description>
+                </>
+              )),
+            );
+          }
+        })
+        .catch(err => console.log(err));
+    }
+  };
+
   React.useEffect(() => {
     setTimeout(() => {
       Animated.timing(fadeOut, {
@@ -86,10 +131,15 @@ const LoadingView = props => {
         useNativeDriver: true,
       }).start(() => {
         setDone(true);
-        Alert.alert('Announcement', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.');
       });
     }, 4000);
   }, [fadeOut]);
+
+  React.useEffect(() => {
+    if (done && props.token) {
+      showAnnouncement();
+    }
+  }, [done, props.token]);
 
   return (
     <Animated.View
@@ -272,6 +322,8 @@ const AppContainer = (token, setToken) => {
 const App = () => {
   const [token, setToken] = useState(null);
   const [needLoad, setNeedLoad] = useState(true);
+  const [visible, setVisible] = useState(false);
+  const [content, setContent] = useState(null);
 
   useEffect(() => {
     const getToken = async () => {
@@ -319,7 +371,11 @@ const App = () => {
         <>{AppContainer(token, setToken)}</>
       )}
       {needLoad ? (
-        <LoadingView style={styles.loadingStyle}>
+        <LoadingView
+          style={styles.loadingStyle}
+          token={token}
+          setVisible={setVisible}
+          setContent={setContent}>
           <FadeInView style={{alignItems: 'center'}}>
             <Image
               source={require('./assets/image/yuan.png')}
@@ -342,6 +398,41 @@ const App = () => {
           </Text>
         </LoadingView>
       ) : null}
+      <Dialog.Container visible={visible}>
+        <Dialog.Title
+          style={{
+            color: '#e64d00',
+            fontFamily: 'Poppins-Medium',
+            fontSize: wp(4.8),
+          }}>
+          Announcement
+        </Dialog.Title>
+        <View style={{height: hp(50)}}>
+          <ScrollView style={{marginLeft: 10}}>
+            {content || (
+              <Dialog.Description
+                style={{
+                  color: '#141414',
+                  fontFamily: 'Poppins-Regular',
+                  fontSize: wp(4),
+                }}>
+                No announcement today
+              </Dialog.Description>
+            )}
+          </ScrollView>
+        </View>
+        <Dialog.Button
+          style={{
+            color: '#e64d00',
+            fontFamily: 'Poppins-Medium',
+            fontSize: wp(4),
+            marginBottom: -5,
+            textTransform: null,
+          }}
+          label="Close"
+          onPress={() => setVisible(false)}
+        />
+      </Dialog.Container>
     </View>
   );
 };
