@@ -74,4 +74,7 @@ export default {
   endTime: 'End Time',
   announcementDesc: 'Content',
   announcementTitle: 'Title',
+  addannouncementTitle: 'Add Announcement',
+  dnTitle: 'Duit Now',
+  tngTitle: 'TNG EWallet',
 };

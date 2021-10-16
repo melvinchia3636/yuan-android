@@ -57,7 +57,7 @@ const Topbar = ({title, goback, navSettings, ...props}) => {
           name={props.notSettings[1]}
           onPress={props.notSettings[0]}
         />
-      ) : null}
+      ) : <Text></Text>}
     </View>
   );
 };

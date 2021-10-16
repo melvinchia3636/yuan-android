@@ -15,6 +15,7 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {ip} from './constant';
 import styles from './styles';
@@ -47,7 +48,7 @@ const downloadFile = async url => {
 
   const _downloadFile = () => {
     let date = new Date();
-    let FILE_URL = 'http://' + ip + '/media/' + url;
+    let FILE_URL = 'https://' + ip + '/media/' + url;
     let file_ext = getFileExtention(FILE_URL);
 
     file_ext = '.' + file_ext[0];
@@ -104,11 +105,14 @@ const downloadFile = async url => {
 
 const WorkStack = createStackNavigator();
 
-function WorkView(token, setToken) {
+function WorkView(token, setToken, navprops) {
   const {t, i18n} = useTranslation();
   return (
     <NavigationContainer>
-      <WorkStack.Navigator headerMode="none">
+      <WorkStack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}>
         <WorkStack.Screen name="WorkIndex">
           {props => (
             <>
@@ -117,19 +121,23 @@ function WorkView(token, setToken) {
                 notSettings={[() => {}, '']}
                 {...props}
               />
-              <WorkIndex {...props} token={token} />
+              <WorkIndex {...props} token={token} navprops={navprops} />
             </>
           )}
         </WorkStack.Screen>
         <WorkStack.Screen name="Work">
           {props => (
             <>
-              <WorkStack.Navigator headerMode="none">
+              <WorkStack.Navigator
+                screenOptions={{
+                  headerShown: false,
+                }}>
                 <WorkStack.Screen name="WorkView">
                   {() => (
                     <>
                       <Topbar
                         title="Classroom"
+                        notSettings={[() => {}, '']}
                         goback={props.navigation.goBack}
                         {...props}
                       />
@@ -142,6 +150,7 @@ function WorkView(token, setToken) {
                     <>
                       <Topbar
                         title="Classwork"
+                        notSettings={[() => {}, '']}
                         goback={() => props.navigation.navigate('WorkView')}
                         {...propss}
                       />
@@ -154,6 +163,7 @@ function WorkView(token, setToken) {
                     <>
                       <Topbar
                         title="Classwork"
+                        notSettings={[() => {}, '']}
                         goback={() => props.navigation.navigate('WorkView')}
                         {...propss}
                       />
@@ -168,15 +178,7 @@ function WorkView(token, setToken) {
         <WorkStack.Screen name="AddWork">
           {props => (
             <>
-              <AddWork {...props} token={token} />
-            </>
-          )}
-        </WorkStack.Screen>
-        <WorkStack.Screen name="Settings">
-          {props => (
-            <>
-              <Topbar title="Settings" goback={props.navigation.goBack} />
-              <SettingsView {...props} token={token} setToken={setToken} />
+              <AddWork {...props} token={token} notSettings={[() => {}, '']} />
             </>
           )}
         </WorkStack.Screen>
@@ -185,10 +187,11 @@ function WorkView(token, setToken) {
   );
 }
 
-const WorkIndex = ({token, ...props}) => {
+const WorkIndex = ({token, navprops, ...props}) => {
   const fetchClassRooms = async () => {
+    const lang = await AsyncStorage.getItem('user-language');
     const response = await axios({
-      url: `http://${ip}/api/v1/classroom/fetch-classroom-list`,
+      url: `https://${ip}/api/v1/classroom/fetch-classroom-list/${lang || 'en'}`,
       headers: {
         authorization: 'Token ' + token,
       },
@@ -207,7 +210,10 @@ const WorkIndex = ({token, ...props}) => {
   }, []);
 
   useEffect(() => {
-    fetchClassRooms().then(res => setClassRooms(res));
+    fetchClassRooms().then(res => setClassRooms(res)),
+      navprops.navigation.addListener('didFocus', () =>
+        fetchClassRooms().then(res => setClassRooms(res)),
+      );
   }, []);
 
   return (
@@ -273,7 +279,7 @@ const Work = ({token, ...props}) => {
 
   const fetchClassWorks = async () => {
     const response = await axios({
-      url: `http://${ip}/api/v1/classroom/fetch-classworks/${classroom.id}`,
+      url: `https://${ip}/api/v1/classroom/fetch-classworks/${classroom.id}`,
       headers: {
         authorization: 'Token ' + token,
       },
@@ -339,8 +345,7 @@ const Work = ({token, ...props}) => {
         </View>
         <ScrollView
           contentContainerStyle={{
-            justifyContent:
-              classWork.data?.length === 0 ? 'center' : 'flex-start',
+            justifyContent: !classWork.data?.length ? 'center' : 'flex-start',
             minHeight: hp(60),
             marginBottom: 16,
           }}>
@@ -644,7 +649,7 @@ const EachWork = ({token, id, ...props}) => {
 
   const fetchWorkDetails = async () => {
     const response = await axios({
-      url: `http://${ip}/api/v1/classroom/fetch-classwork/${props.route.params.id}`,
+      url: `https://${ip}/api/v1/classroom/fetch-classwork/${props.route.params.id}`,
       headers: {
         authorization: 'Token ' + token,
       },
@@ -679,7 +684,7 @@ const EachWork = ({token, id, ...props}) => {
     works.forEach(item => body.append('file[]', item.content));
     setLoading(true);
 
-    fetch(`http://${ip}/api/v1/classroom/upload/${props.route.params.id}`, {
+    fetch(`https://${ip}/api/v1/classroom/upload/${props.route.params.id}`, {
       headers: {
         authorization: 'Token ' + token,
       },
@@ -695,7 +700,7 @@ const EachWork = ({token, id, ...props}) => {
 
   const unsubmitWork = () => {
     axios({
-      url: `http://${ip}/api/v1/classroom/unsubmit/${props.route.params.id}`,
+      url: `https://${ip}/api/v1/classroom/unsubmit/${props.route.params.id}`,
       headers: {
         authorization: 'Token ' + token,
       },
@@ -819,7 +824,7 @@ const EachWork = ({token, id, ...props}) => {
           {attachment?.map((e, i) => (
             <Pressable
               onPress={() =>
-                Linking.openURL('http://' + ip + '/media/' + e.path)
+                Linking.openURL('https://' + ip + '/media/' + e.path)
               }
               style={{
                 paddingVertical: 8,
@@ -1029,7 +1034,7 @@ const AddWork = props => {
       body.append('type', type);
       setLoading(true);
       axios({
-        url: `http://${ip}/api/v1/classroom/create-classwork/${classroom}`,
+        url: `https://${ip}/api/v1/classroom/create-classwork/${classroom}`,
         method: 'POST',
         headers: {
           authorization: 'Token ' + props.token,
@@ -1208,7 +1213,7 @@ const StudentsWork = props => {
 
   useEffect(() => {
     axios({
-      url: `http://${ip}/api/v1/classroom/fetch-students-work/${props.route.params.id}`,
+      url: `https://${ip}/api/v1/classroom/fetch-students-work/${props.route.params.id}`,
       headers: {
         authorization: 'Token ' + props.token,
       },
@@ -1234,7 +1239,7 @@ const StudentsWork = props => {
           {files?.map((e, i) => (
             <Pressable
               onPress={() =>
-                Linking.openURL('http://' + ip + '/media/' + e.path)
+                Linking.openURL('https://' + ip + '/media/' + e.path)
               }
               style={{
                 paddingVertical: 8,

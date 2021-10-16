@@ -29,7 +29,10 @@ function ChatView(token, setToken, navprops) {
   return (
     <>
       <NavigationContainer>
-        <ChatStack.Navigator headerMode="none">
+        <ChatStack.Navigator
+          screenOptions={{
+            headerShown: false,
+          }}>
           <ChatStack.Screen name="ChatIndex">
             {props => (
               <>
@@ -94,7 +97,7 @@ const ChatIndex = props => {
   const {t} = useTranslation();
   const fetchChatRoom = () => {
     axios({
-      url: `http://${ip}/api/v1/chat/fetch-chatroom`,
+      url: `https://${ip}/api/v1/chat/fetch-chatroom`,
       method: 'GET',
       headers: {
         Authorization: 'Token ' + props.token,
@@ -138,7 +141,7 @@ const ChatIndex = props => {
                   marginRight: 10,
                 }}
                 source={{
-                  uri: 'http://' + ip + e.target[0].avatar,
+                  uri: 'https://' + ip + e.target[0].avatar,
                 }}
               />
             </View>
@@ -191,7 +194,7 @@ const Chat = ({token, navprops, ...props}) => {
     if (message) {
       setMessage('');
       axios({
-        url: `http://${ip}/api/v1/chat/update-chat/` + roomID,
+        url: `https://${ip}/api/v1/chat/update-chat/` + roomID,
         method: 'POST',
         headers: {
           Authorization: 'Token ' + token,
@@ -209,7 +212,7 @@ const Chat = ({token, navprops, ...props}) => {
 
   const fetchChat = () => {
     axios({
-      url: `http://${ip}/api/v1/chat/fetch-chat/` + roomID,
+      url: `https://${ip}/api/v1/chat/fetch-chat/` + roomID,
       method: 'GET',
       headers: {
         Authorization: 'Token ' + token,
@@ -320,7 +323,7 @@ const Chat = ({token, navprops, ...props}) => {
                             marginRight: 10,
                           }}
                           source={{
-                            uri: 'http://' + ip + e.author.avatar,
+                            uri: 'https://' + ip + e.author.avatar,
                           }}
                         />
                       ) : null}
@@ -347,7 +350,7 @@ const Chat = ({token, navprops, ...props}) => {
                             marginLeft: 10,
                           }}
                           source={{
-                            uri: 'http://' + ip + e.author.avatar,
+                            uri: 'https://' + ip + e.author.avatar,
                           }}
                         />
                       ) : null}
@@ -409,7 +412,7 @@ const AddContact = ({token, ...props}) => {
 
   useEffect(() => {
     axios({
-      url: `http://${ip}/api/v1/chat/fetch-contacts`,
+      url: `https://${ip}/api/v1/chat/fetch-contacts`,
       method: 'GET',
       headers: {
         Authorization: 'Token ' + token,
@@ -421,7 +424,7 @@ const AddContact = ({token, ...props}) => {
 
   const createContact = id => {
     axios({
-      url: `http://${ip}/api/v1/chat/create-contact/${id}`,
+      url: `https://${ip}/api/v1/chat/create-contact/${id}`,
       method: 'POST',
       headers: {
         Authorization: 'Token ' + token,
@@ -434,7 +437,7 @@ const AddContact = ({token, ...props}) => {
   };
 
   return (
-    <>
+    <ScrollView>
       {contacts.map(e => (
         <Pressable
           key={e.id}
@@ -464,7 +467,7 @@ const AddContact = ({token, ...props}) => {
                 marginRight: 10,
               }}
               source={{
-                uri: 'http://' + ip + e.avatar,
+                uri: 'https://' + ip + e.avatar,
               }}
             />
             <View>
@@ -481,7 +484,7 @@ const AddContact = ({token, ...props}) => {
           </View>
         </Pressable>
       ))}
-    </>
+    </ScrollView>
   );
 };
 

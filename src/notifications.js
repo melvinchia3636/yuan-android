@@ -19,7 +19,7 @@ const getFcmToken = async token => {
   const fcmToken = await messaging().getToken();
   if (fcmToken) {
     axios({
-      url: `http://${ip}/api/v1/notifications/add-token`,
+      url: `https://${ip}/api/v1/notifications/add-token`,
       method: 'PUT',
       headers: {
         Authorization: 'Token ' + token,

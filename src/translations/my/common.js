@@ -69,9 +69,12 @@ export default {
   newContact: 'Kenalan Baru',
   eventDesc: 'Kenalan untuk Aktiviti',
   addeventTitle: 'Tambah Aktiviti',
-  noCommentCreated: '尚未创建任何评语',
+  noCommentCreated: 'Tiada komen yang diberi pada hari ini',
   startTime: 'Masa Mula',
   endTime: 'Masa Tamat',
   announcementDesc: 'Kandungan',
   announcementTitle: 'Tajuk',
+  addannouncementTitle: 'Tambah Pengumuman',
+  dnTitle: 'Duit Now',
+  tngTitle: 'TNG EWallet',
 };

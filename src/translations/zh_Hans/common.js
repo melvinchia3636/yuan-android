@@ -74,4 +74,7 @@ export default {
   endTime: '结束时间',
   announcementTitle: '公告标题',
   announcementDesc: '公告内容',
+  addannouncementTitle: '创建公告',
+  dnTitle: 'Duit Now',
+  tngTitle: 'TNG EWallet',
 };

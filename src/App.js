@@ -30,12 +30,14 @@ import {createBottomTabNavigator} from 'react-navigation-tabs';
 import messaging from '@react-native-firebase/messaging';
 import * as notifications from './notifications.js';
 import DialogBox from 'react-native-dialogbox';
-
 import styles from './styles';
+
+import PayView from './Pay';
 import CommentView from './Comment';
 import ChatView from './Chat';
 import WorkView from './Work';
-import ProfileView from './Profile.js';
+import ProfileView from './Profile';
+
 import {ip} from './constant';
 import {useTranslation} from 'react-i18next';
 import Topbar from './Topbar';
@@ -82,7 +84,7 @@ const LoadingView = props => {
   const showAnnouncement = () => {
     if (props.token) {
       axios({
-        url: `http://${ip}/api/v1/announcement/fetch-announcement`,
+        url: `https://${ip}/api/v1/announcement/fetch-announcement`,
         method: 'GET',
         headers: {
           authorization: 'Token ' + props.token,
@@ -185,7 +187,7 @@ const LoginView = props => {
     const fetchToken = async () => {
       const token = await axios({
         method: 'POST',
-        url: `http://${ip}/api/v1/auth/login`,
+        url: `https://${ip}/api/v1/auth/login`,
         data: {
           username: username,
           password: password,
@@ -213,7 +215,7 @@ const LoginView = props => {
   };
 
   const changePassword = () => {
-    Linking.openURL(`http://${ip}/password-reset/`);
+    Linking.openURL(`https://${ip}/password-reset/`);
   };
 
   return (
@@ -249,31 +251,6 @@ const LoginView = props => {
       </Pressable>
       <DialogBox ref={dialogbox} />
     </View>
-  );
-};
-
-const PayView = () => {
-  return (
-    <>
-      <Topbar title="Pay" />
-      <View style={{width: '100%', height: '90%', padding: 20}}>
-        <Image
-          source={{
-            uri:
-              'http://' +
-              ip +
-              '/static/980aadbd-a2d9-4661-b838-ede65a599ca5.jpeg',
-          }}
-          style={{
-            flex: 1,
-            width: null,
-            height: null,
-            resizeMode: 'contain',
-            borderRadius: 10,
-          }}
-        />
-      </View>
-    </>
   );
 };
 

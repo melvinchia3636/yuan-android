@@ -12,7 +12,6 @@
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.15.5",
     "@react-native-community/masked-view": "^0.1.11",
-    "@react-native-community/picker": "^1.8.1",
     "@react-native-firebase/app": "^12.0.0",
     "@react-native-firebase/messaging": "^12.0.0",
     "@react-native-picker/picker": "^2.1.0",
@@ -43,7 +42,6 @@
     "react-native-dropdown-picker": "^5.1.28",
     "react-native-elements": "^3.4.1",
     "react-native-gesture-handler": "^1.10.3",
-    "react-native-localize": "^2.1.5",
     "react-native-material-textfield": "^0.16.1",
     "react-native-modalbox": "^2.0.2",
     "react-native-pager-view": "^5.4.6",
