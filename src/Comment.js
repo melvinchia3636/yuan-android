@@ -45,7 +45,7 @@ const getComments = async (date, token) => {
   const year = date.getFullYear();
   const month = date.getMonth();
   const comments = await axios({
-    url: `https://${ip}/api/v1/comments/fetch-comments/auto/${year}/${month}`,
+    url: `http://${ip}/api/v1/comments/fetch-comments/auto/${year}/${month}`,
     method: 'GET',
     headers: {
       Authorization: 'Token ' + token,
@@ -56,7 +56,7 @@ const getComments = async (date, token) => {
 
 const getStudentsComment = async (date, token) => {
   const comments = await axios({
-    url: `https://${ip}/api/v1/comments/fetch-students-comment/${date.getFullYear()}-${
+    url: `http://${ip}/api/v1/comments/fetch-students-comment/${date.getFullYear()}-${
       date.getMonth() + 1
     }-${date.getDate()}`,
     method: 'GET',
@@ -178,7 +178,7 @@ const CalendarView = props => {
   const fetchEvent = date => {
     const day = date.getDay() - 1 >= 0 ? date.getDay() - 1 : 6;
     axios({
-      url: `https://${ip}/api/v1/events/fetch-event/${date.getFullYear()}-${
+      url: `http://${ip}/api/v1/events/fetch-event/${date.getFullYear()}-${
         date.getMonth() + 1
       }-${date.getDate()}`,
       method: 'GET',
@@ -507,7 +507,7 @@ const CalendarView = props => {
                         background: 'white',
                       }}>
                       <Image
-                        source={{uri: 'https://' + ip + avatar}}
+                        source={{uri: 'http://' + ip + avatar}}
                         style={{
                           width: 32,
                           height: 32,
@@ -702,7 +702,7 @@ const EachCommentView = props => {
 
   const updateReplies = data => {
     axios({
-      url: `https://${ip}/api/v1/comments/fetch-replies/${
+      url: `http://${ip}/api/v1/comments/fetch-replies/${
         props.route.params.id || 'auto'
       }/${data.id}`,
       method: 'GET',
@@ -719,7 +719,7 @@ const EachCommentView = props => {
   const sendReply = () => {
     if (message) {
       axios({
-        url: `https://${ip}/api/v1/comments/add-reply/${comment.id}`,
+        url: `http://${ip}/api/v1/comments/add-reply/${comment.id}`,
         method: 'PUT',
         data: {
           reply: message,
@@ -753,7 +753,7 @@ const EachCommentView = props => {
       },
     );
     axios({
-      url: `https://${ip}/api/v1/comments/fetch-comment/${
+      url: `http://${ip}/api/v1/comments/fetch-comment/${
         props.route.params.id || 'auto'
       }/${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`,
       method: 'GET',
@@ -777,7 +777,7 @@ const EachCommentView = props => {
 
   const formatURL = content => {
     const urlPattern =
-      /((?:https|ftp|httpss):\/\/(?:[\w_-]+(?:(?:\.[\w_-]+)+))(?:[\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]))/g;
+      /((?:http|ftp|https):\/\/(?:[\w_-]+(?:(?:\.[\w_-]+)+))(?:[\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]))/g;
     return (
       <>
         {content?.split(urlPattern)?.map(e => {
@@ -806,7 +806,7 @@ const EachCommentView = props => {
           text: 'Yes',
           onPress: () => {
             axios({
-              url: `https://${ip}/api/v1/comments/delete-comment/${comment.id}`,
+              url: `http://${ip}/api/v1/comments/delete-comment/${comment.id}`,
               method: 'POST',
               headers: {
                 authorization: 'Token ' + props.token,
@@ -876,7 +876,7 @@ const EachCommentView = props => {
             ? JSON.parse(comment.attachment).map((e, i) => (
                 <Pressable
                   onPress={() =>
-                    Linking.openURL('https://' + ip + '/media/' + e.path)
+                    Linking.openURL('http://' + ip + '/media/' + e.path)
                   }
                   style={{
                     paddingVertical: 8,
@@ -941,7 +941,7 @@ const EachCommentView = props => {
                         marginTop: 5,
                       }}
                       source={{
-                        uri: 'https://' + ip + e.avatar,
+                        uri: 'http://' + ip + e.avatar,
                       }}
                     />
                     <View style={{width: '84%'}}>
@@ -1026,7 +1026,7 @@ const AddComment = props => {
 
       setLoading(true);
       axios({
-        url: `https://${ip}/api/v1/comments/create-comment`,
+        url: `http://${ip}/api/v1/comments/create-comment`,
         method: 'POST',
         headers: {
           authorization: 'Token ' + props.token,
@@ -1082,7 +1082,7 @@ const AddComment = props => {
 
   useEffect(() => {
     axios({
-      url: `https://${ip}/api/v1/comments/fetch-students/${date.getFullYear()}-${
+      url: `http://${ip}/api/v1/comments/fetch-students/${date.getFullYear()}-${
         date.getMonth() + 1
       }-${date.getDate()}`,
       method: 'GET',
@@ -1290,7 +1290,7 @@ const AddAnnouncement = props => {
   const submitContent = () => {
     if (content.trim() && title.trim()) {
       axios({
-        url: `https://${ip}/api/v1/announcement/create-announcement`,
+        url: `http://${ip}/api/v1/announcement/create-announcement`,
         method: 'POST',
         data: {
           startTime: startTime.toLocaleDateString('en'),
@@ -1453,7 +1453,7 @@ const AddEvent = props => {
   const submitContent = () => {
     if (content.trim()) {
       axios({
-        url: `https://${ip}/api/v1/activity/create-activity`,
+        url: `http://${ip}/api/v1/activity/create-activity`,
         method: 'POST',
         data: {
           date: date.toDateString(),

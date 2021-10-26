@@ -29,7 +29,7 @@ const SettingsView = ({token, setToken}) => {
       const fcm_token = await AsyncStorage.getItem('@fcm_token');
       const result = await axios({
         method: 'POST',
-        url: `https://${ip}/api/v1/auth/logout`,
+        url: `http://${ip}/api/v1/auth/logout`,
         headers: {
           Authorization: 'Token ' + token,
         },

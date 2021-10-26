@@ -61,7 +61,7 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
   const fetchUserData = async () => {
     const response = await axios({
       method: 'GET',
-      url: `https://${ip}/api/v1/user/fetch-user`,
+      url: `http://${ip}/api/v1/user/fetch-user`,
       headers: {
         Authorization: 'Token ' + token,
       },
@@ -77,7 +77,10 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
   useEffect(() => {
     fetchUserData();
     props.navigation.addListener('focus', () => {
-      fetchUserData;
+      fetchUserData();
+    });
+    navprops.navigation.addListener('didFocus', () => {
+      fetchUserData();
     });
   }, []);
 
@@ -89,7 +92,7 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
             <Image
               style={styles.avatar}
               source={{
-                uri: 'https://' + ip + (data ? data.avatar : ''),
+                uri: 'http://' + ip + (data ? data.avatar : ''),
               }}
             />
           </View>
@@ -161,6 +164,49 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
                     marginBottom: 20,
                   }}>
                   {t('common:noEvent')}
+                </Text>
+              )}
+            </View>
+            <View style={styles.homepageInnerContentContainer}>
+              <Text style={styles.homepageSectionHeader}>
+                {t('common:announcementsTitle')}
+              </Text>
+              <View style={styles.homepageSectionHeaderSeperator} />
+              {data?.announcement?.length ? (
+                <View
+                  style={{
+                    marginBottom: 20,
+                  }}>
+                  {data.announcement.map(e => (
+                    <View
+                      style={{
+                        marginBottom: 20,
+                      }}>
+                      <Text
+                        style={{
+                          fontFamily: 'Poppins-Medium',
+                          fontSize: wp(5),
+                        }}>
+                        {e.title}
+                      </Text>
+                      <Text
+                        style={{
+                          color: '#141414',
+                          fontFamily: 'Poppins-Regular',
+                        }}>
+                        {e.content}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <Text
+                  style={{
+                    color: '#141414',
+                    fontFamily: 'Poppins-Regular',
+                    marginBottom: 20,
+                  }}>
+                  {t('common:noAnnouncements')}
                 </Text>
               )}
             </View>

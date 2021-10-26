@@ -84,7 +84,7 @@ const LoadingView = props => {
   const showAnnouncement = () => {
     if (props.token) {
       axios({
-        url: `https://${ip}/api/v1/announcement/fetch-announcement`,
+        url: `http://${ip}/api/v1/announcement/fetch-announcement`,
         method: 'GET',
         headers: {
           authorization: 'Token ' + props.token,
@@ -187,7 +187,7 @@ const LoginView = props => {
     const fetchToken = async () => {
       const token = await axios({
         method: 'POST',
-        url: `https://${ip}/api/v1/auth/login`,
+        url: `http://${ip}/api/v1/auth/login`,
         data: {
           username: username,
           password: password,
@@ -215,7 +215,7 @@ const LoginView = props => {
   };
 
   const changePassword = () => {
-    Linking.openURL(`https://${ip}/password-reset/`);
+    Linking.openURL(`http://${ip}/password-reset/`);
   };
 
   return (

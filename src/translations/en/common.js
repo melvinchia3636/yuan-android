@@ -77,4 +77,6 @@ export default {
   addannouncementTitle: 'Add Announcement',
   dnTitle: 'Duit Now',
   tngTitle: 'TNG EWallet',
+  announcementsTitle: 'Announcements',
+  noAnnouncements: 'Nothing was announced.',
 };

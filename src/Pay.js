@@ -116,7 +116,7 @@ const TouchNGo = () => {
         <Image
           source={{
             uri:
-              'https://' +
+              'http://' +
               ip +
               '/static/980aadbd-a2d9-4661-b838-ede65a599ca5.jpeg',
           }}
@@ -140,7 +140,7 @@ const DuitNow = () => {
         <Image
           source={{
             uri:
-              'https://' +
+              'http://' +
               ip +
               '/static/8dc61863-5739-4864-aaf0-00a6ef8516d1.jpg',
           }}

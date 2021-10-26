@@ -48,7 +48,7 @@ const downloadFile = async url => {
 
   const _downloadFile = () => {
     let date = new Date();
-    let FILE_URL = 'https://' + ip + '/media/' + url;
+    let FILE_URL = 'http://' + ip + '/media/' + url;
     let file_ext = getFileExtention(FILE_URL);
 
     file_ext = '.' + file_ext[0];
@@ -191,7 +191,7 @@ const WorkIndex = ({token, navprops, ...props}) => {
   const fetchClassRooms = async () => {
     const lang = await AsyncStorage.getItem('user-language');
     const response = await axios({
-      url: `https://${ip}/api/v1/classroom/fetch-classroom-list/${lang || 'en'}`,
+      url: `http://${ip}/api/v1/classroom/fetch-classroom-list/${lang || 'en'}`,
       headers: {
         authorization: 'Token ' + token,
       },
@@ -210,10 +210,10 @@ const WorkIndex = ({token, navprops, ...props}) => {
   }, []);
 
   useEffect(() => {
-    fetchClassRooms().then(res => setClassRooms(res)),
-      navprops.navigation.addListener('didFocus', () =>
-        fetchClassRooms().then(res => setClassRooms(res)),
-      );
+    fetchClassRooms().then(res => setClassRooms(res));
+    navprops.navigation.addListener('didFocus', () =>
+      fetchClassRooms().then(res => setClassRooms(res)),
+    );
   }, []);
 
   return (
@@ -279,7 +279,7 @@ const Work = ({token, ...props}) => {
 
   const fetchClassWorks = async () => {
     const response = await axios({
-      url: `https://${ip}/api/v1/classroom/fetch-classworks/${classroom.id}`,
+      url: `http://${ip}/api/v1/classroom/fetch-classworks/${classroom.id}`,
       headers: {
         authorization: 'Token ' + token,
       },
@@ -649,7 +649,7 @@ const EachWork = ({token, id, ...props}) => {
 
   const fetchWorkDetails = async () => {
     const response = await axios({
-      url: `https://${ip}/api/v1/classroom/fetch-classwork/${props.route.params.id}`,
+      url: `http://${ip}/api/v1/classroom/fetch-classwork/${props.route.params.id}`,
       headers: {
         authorization: 'Token ' + token,
       },
@@ -684,7 +684,7 @@ const EachWork = ({token, id, ...props}) => {
     works.forEach(item => body.append('file[]', item.content));
     setLoading(true);
 
-    fetch(`https://${ip}/api/v1/classroom/upload/${props.route.params.id}`, {
+    fetch(`http://${ip}/api/v1/classroom/upload/${props.route.params.id}`, {
       headers: {
         authorization: 'Token ' + token,
       },
@@ -700,7 +700,7 @@ const EachWork = ({token, id, ...props}) => {
 
   const unsubmitWork = () => {
     axios({
-      url: `https://${ip}/api/v1/classroom/unsubmit/${props.route.params.id}`,
+      url: `http://${ip}/api/v1/classroom/unsubmit/${props.route.params.id}`,
       headers: {
         authorization: 'Token ' + token,
       },
@@ -824,7 +824,7 @@ const EachWork = ({token, id, ...props}) => {
           {attachment?.map((e, i) => (
             <Pressable
               onPress={() =>
-                Linking.openURL('https://' + ip + '/media/' + e.path)
+                Linking.openURL('http://' + ip + '/media/' + e.path)
               }
               style={{
                 paddingVertical: 8,
@@ -1034,7 +1034,7 @@ const AddWork = props => {
       body.append('type', type);
       setLoading(true);
       axios({
-        url: `https://${ip}/api/v1/classroom/create-classwork/${classroom}`,
+        url: `http://${ip}/api/v1/classroom/create-classwork/${classroom}`,
         method: 'POST',
         headers: {
           authorization: 'Token ' + props.token,
@@ -1213,7 +1213,7 @@ const StudentsWork = props => {
 
   useEffect(() => {
     axios({
-      url: `https://${ip}/api/v1/classroom/fetch-students-work/${props.route.params.id}`,
+      url: `http://${ip}/api/v1/classroom/fetch-students-work/${props.route.params.id}`,
       headers: {
         authorization: 'Token ' + props.token,
       },
@@ -1239,7 +1239,7 @@ const StudentsWork = props => {
           {files?.map((e, i) => (
             <Pressable
               onPress={() =>
-                Linking.openURL('https://' + ip + '/media/' + e.path)
+                Linking.openURL('http://' + ip + '/media/' + e.path)
               }
               style={{
                 paddingVertical: 8,

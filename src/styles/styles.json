@@ -115,7 +115,7 @@
 		"width": 100,
 		"paddingHorizontal": 30,
 		"marginTop": 20,
-		"marginBottom": 30
+		"marginBottom": 10
 	},
 	"homepageSectionHeader": {
 		"color": "#666666",
