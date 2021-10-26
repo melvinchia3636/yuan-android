@@ -79,4 +79,5 @@ export default {
   tngTitle: 'TNG EWallet',
   announcementsTitle: 'Announcements',
   noAnnouncements: 'Nothing was announced.',
+  notifyTitle: 'Notify Payment',
 };

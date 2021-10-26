@@ -305,7 +305,7 @@ const Work = ({token, ...props}) => {
   const panelRef = useRef();
   const [panelHideToggle, setPanelHideToggle] = useState(false);
 
-  !panelHideToggle ? panelRef.current?.hide() : null;
+  !panelHideToggle && panelRef.current?.hide();
 
   return (
     <>
@@ -412,7 +412,7 @@ const Work = ({token, ...props}) => {
           )}
         </ScrollView>
       </ScrollView>
-      {classWork.editable ? (
+      {classWork.editable && (
         <>
           {panelHideToggle ? (
             <Pressable
@@ -535,7 +535,7 @@ const Work = ({token, ...props}) => {
             </View>
           </SlidingUpPanel>
         </>
-      ) : null}
+      )}
     </>
   );
 };
@@ -689,7 +689,7 @@ const EachWork = ({token, id, ...props}) => {
         authorization: 'Token ' + token,
       },
       method: 'POST',
-      body: works.length > 0 ? body : null,
+      body: works.length > 0 && body,
     })
       .then(res => {
         setSubmitted(true);
@@ -723,7 +723,7 @@ const EachWork = ({token, id, ...props}) => {
           setMyWorks(media);
           setSubmitted(true);
         }
-        const attachments = res.attachment ? JSON.parse(res.attachment) : null;
+        const attachments = res.attachment && JSON.parse(res.attachment);
         if (attachments && attachments.length > 0) {
           setAttachment(attachments);
         }
@@ -769,14 +769,13 @@ const EachWork = ({token, id, ...props}) => {
             paddingHorizontal: 20,
             fontFamily: 'Poppins-Medium',
           }}>
-          {workDetails.time
-            ? new Date(workDetails.time).toLocaleString('en-GB', {
-                day: 'numeric',
-                month: 'short',
-                hour: 'numeric',
-                minute: 'numeric',
-              })
-            : null}
+          {workDetails.time &&
+            new Date(workDetails.time).toLocaleString('en-GB', {
+              day: 'numeric',
+              month: 'short',
+              hour: 'numeric',
+              minute: 'numeric',
+            })}
         </Text>
         <Text
           style={{
@@ -800,7 +799,7 @@ const EachWork = ({token, id, ...props}) => {
           }}>
           {workDetails.details}
         </Text>
-        {attachment ? (
+        {attachment && (
           <Text
             style={{
               marginHorizontal: 20,
@@ -812,7 +811,7 @@ const EachWork = ({token, id, ...props}) => {
             }}>
             {t('common:attachment')}
           </Text>
-        ) : null}
+        )}
         <View
           style={{
             paddingHorizontal: 20,
@@ -857,7 +856,7 @@ const EachWork = ({token, id, ...props}) => {
           ))}
         </View>
       </ScrollView>
-      {workDetails.type === 'assignment' && workDetails.isStudent ? (
+      {workDetails.type === 'assignment' && workDetails.isStudent && (
         <SlidingUpPanel
           ref={slidePanel}
           backdropOpacity={0}
@@ -943,7 +942,7 @@ const EachWork = ({token, id, ...props}) => {
                           }}>
                           {e.content.name}
                         </Text>
-                        {!isSubmitted ? (
+                        {!isSubmitted && (
                           <Pressable
                             onPress={() => {
                               setMyWorks(
@@ -952,33 +951,35 @@ const EachWork = ({token, id, ...props}) => {
                             }}>
                             <Feather name="x" size={18} color="#141414" />
                           </Pressable>
-                        ) : null}
+                        )}
                       </Pressable>
                     ))}
                   </ScrollView>
                 </View>
-              ) : myWorks.length > 0 ? (
-                <View
-                  style={{
-                    paddingVertical: 5,
-                    paddingHorizontal: 15,
-                    borderRadius: 100,
-                    borderWidth: 1,
-                    borderColor: 'rgba(0, 0, 0, 0.1)',
-                    marginBottom: 20,
-                  }}>
-                  <Text
-                    numberOfLines={1}
+              ) : (
+                myWorks.length > 0 && (
+                  <View
                     style={{
-                      fontFamily: 'Poppins-Medium',
-                      color: '#333333',
+                      paddingVertical: 5,
+                      paddingHorizontal: 15,
+                      borderRadius: 100,
+                      borderWidth: 1,
+                      borderColor: 'rgba(0, 0, 0, 0.1)',
+                      marginBottom: 20,
                     }}>
-                    {myWorks.length === 1
-                      ? myWorks[0].content.name
-                      : myWorks.length + ' attachments'}
-                  </Text>
-                </View>
-              ) : null}
+                    <Text
+                      numberOfLines={1}
+                      style={{
+                        fontFamily: 'Poppins-Medium',
+                        color: '#333333',
+                      }}>
+                      {myWorks.length === 1
+                        ? myWorks[0].content.name
+                        : myWorks.length + ' attachments'}
+                    </Text>
+                  </View>
+                )
+              )}
               {isExpand ? (
                 <View>
                   {isSubmitted ? (
@@ -1008,7 +1009,7 @@ const EachWork = ({token, id, ...props}) => {
             </View>
           </View>
         </SlidingUpPanel>
-      ) : null}
+      )}
     </>
   );
 };

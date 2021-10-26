@@ -161,7 +161,6 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
                   style={{
                     color: '#141414',
                     fontFamily: 'Poppins-Regular',
-                    marginBottom: 20,
                   }}>
                   {t('common:noEvent')}
                 </Text>
@@ -210,7 +209,7 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
                 </Text>
               )}
             </View>
-            {data && data.role === 'student' ? (
+            {data && data.role === 'student' && (
               <View
                 style={{
                   ...styles.homepageInnerContentContainer,
@@ -236,7 +235,7 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
                     ? data.comment.content
                     : t('common:noCommentToday')}
                 </Text>
-                {data.comment ? (
+                {data.comment && (
                   <>
                     <Text style={styles.homepageCommentAuthor}>
                       - {data.comment.author}
@@ -248,9 +247,9 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
                       </Text>
                     </Pressable>
                   </>
-                ) : null}
+                )}
               </View>
-            ) : null}
+            )}
           </ScrollView>
         </View>
       </View>

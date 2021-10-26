@@ -77,4 +77,7 @@ export default {
   addannouncementTitle: 'Tambah Pengumuman',
   dnTitle: 'Duit Now',
   tngTitle: 'TNG EWallet',
+  notifyTitle: 'Peringatan Pembayaran',
+  announcementsTitle: 'Pengumuman',
+  noAnnouncements: 'Tiada pengumuman baru-baru ini',
 };

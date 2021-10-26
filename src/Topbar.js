@@ -15,7 +15,7 @@ const Topbar = ({title, goback, navSettings, ...props}) => {
   const {t, i18n} = useTranslation();
   return (
     <View style={{...styles.topbar, zIndex: 9999}}>
-      {goback ? (
+      {goback && (
         <Pressable
           onPress={goback}
           style={{
@@ -27,7 +27,7 @@ const Topbar = ({title, goback, navSettings, ...props}) => {
             size={wp(8)}
           />
         </Pressable>
-      ) : null}
+      )}
       <Text style={styles.topbarTitle}>
         {title.includes('common:comment_date')
           ? (() => {

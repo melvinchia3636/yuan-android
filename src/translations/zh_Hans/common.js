@@ -77,4 +77,7 @@ export default {
   addannouncementTitle: '创建公告',
   dnTitle: 'Duit Now',
   tngTitle: 'TNG EWallet',
+  notifyTitle: '缴费提醒',
+  announcementsTitle: '通告',
+  noAnnouncements: '近期没有任何通告',
 };

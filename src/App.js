@@ -347,7 +347,7 @@ const App = () => {
       ) : (
         <>{AppContainer(token, setToken)}</>
       )}
-      {needLoad ? (
+      {needLoad && (
         <LoadingView
           style={styles.loadingStyle}
           token={token}
@@ -374,7 +374,7 @@ const App = () => {
             Copyright &copy; 2021 All rights reserved.
           </Text>
         </LoadingView>
-      ) : null}
+      )}
       <Dialog.Container visible={visible}>
         <Dialog.Title
           style={{

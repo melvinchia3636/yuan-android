@@ -289,88 +289,87 @@ const Chat = ({token, navprops, ...props}) => {
           onContentSizeChange={() =>
             scrollViewRef.current.scrollToEnd({animated: true})
           }>
-          {chat.data
-            ? (() => {
-                return chat.data.map(e => {
-                  return (
-                    <View
-                      style={{
-                        alignSelf:
-                          chat.self === e.author.id ? 'flex-end' : 'flex-start',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        marginBottom: 20,
-                      }}
-                      key={e.id}>
-                      {chat.self === e.author.id ? (
-                        <Text
-                          style={{
-                            marginRight: 10,
-                            fontSize: wp(2.8),
-                            color: '#BBBBBB',
-                            fontFamily: 'Poppins-Regular',
-                            marginTop: 3,
-                          }}>
-                          {e.time}
-                        </Text>
-                      ) : null}
-                      {chat.self !== e.author.id ? (
-                        <Image
-                          style={{
-                            width: wp(10),
-                            height: wp(10),
-                            borderRadius: 100,
-                            marginRight: 10,
-                          }}
-                          source={{
-                            uri: 'http://' + ip + e.author.avatar,
-                          }}
-                        />
-                      ) : null}
+          {chat.data &&
+            (() => {
+              return chat.data.map(e => {
+                return (
+                  <View
+                    style={{
+                      alignSelf:
+                        chat.self === e.author.id ? 'flex-end' : 'flex-start',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: 20,
+                    }}
+                    key={e.id}>
+                    {chat.self === e.author.id && (
                       <Text
                         style={{
-                          paddingBottom: 6,
-                          paddingTop: 10,
-                          paddingHorizontal: 20,
-                          backgroundColor: 'white',
-                          borderRadius: 10,
-                          maxWidth: '70%',
-                          color: '#141414',
+                          marginRight: 10,
+                          fontSize: wp(2.8),
+                          color: '#BBBBBB',
                           fontFamily: 'Poppins-Regular',
-                          fontSize: wp(3.5),
+                          marginTop: 3,
                         }}>
-                        {e.content}
+                        {e.time}
                       </Text>
-                      {chat.self === e.author.id ? (
-                        <Image
-                          style={{
-                            width: wp(10),
-                            height: wp(10),
-                            borderRadius: 100,
-                            marginLeft: 10,
-                          }}
-                          source={{
-                            uri: 'http://' + ip + e.author.avatar,
-                          }}
-                        />
-                      ) : null}
-                      {chat.self !== e.author.id ? (
-                        <Text
-                          style={{
-                            marginLeft: 10,
-                            fontSize: wp(2.8),
-                            color: '#BBBBBB',
-                            fontFamily: 'Poppins-Regular',
-                            marginTop: 3,
-                          }}>
-                          {e.time}
-                        </Text>
-                      ) : null}
-                    </View>
-                  );
-                });
-              })()
-            : null}
+                    )}
+                    {chat.self !== e.author.id && (
+                      <Image
+                        style={{
+                          width: wp(10),
+                          height: wp(10),
+                          borderRadius: 100,
+                          marginRight: 10,
+                        }}
+                        source={{
+                          uri: 'http://' + ip + e.author.avatar,
+                        }}
+                      />
+                    )}
+                    <Text
+                      style={{
+                        paddingBottom: 6,
+                        paddingTop: 10,
+                        paddingHorizontal: 20,
+                        backgroundColor: 'white',
+                        borderRadius: 10,
+                        maxWidth: '70%',
+                        color: '#141414',
+                        fontFamily: 'Poppins-Regular',
+                        fontSize: wp(3.5),
+                      }}>
+                      {e.content}
+                    </Text>
+                    {chat.self === e.author.id && (
+                      <Image
+                        style={{
+                          width: wp(10),
+                          height: wp(10),
+                          borderRadius: 100,
+                          marginLeft: 10,
+                        }}
+                        source={{
+                          uri: 'http://' + ip + e.author.avatar,
+                        }}
+                      />
+                    )}
+                    {chat.self !== e.author.id && (
+                      <Text
+                        style={{
+                          marginLeft: 10,
+                          fontSize: wp(2.8),
+                          color: '#BBBBBB',
+                          fontFamily: 'Poppins-Regular',
+                          marginTop: 3,
+                        }}>
+                        {e.time}
+                      </Text>
+                    )}
+                  </View>
+                );
+              });
+            })()}
         </ScrollView>
         <View
           style={{

@@ -139,7 +139,7 @@ const CalendarView = props => {
   const [event, setEvent] = useState([]);
   const panelRef = useRef();
   const [panelHideToggle, setPanelHideToggle] = useState(false);
-  !panelHideToggle ? panelRef.current?.hide() : null;
+  !panelHideToggle && panelRef.current?.hide();
   const [comments, setComments] = useState(null);
   const [studentsComment, setStudentsComment] = useState([]);
   const [editable, setEditable] = useState(false);
@@ -344,27 +344,28 @@ const CalendarView = props => {
                             {d.replace('p', '')}
                           </Text>
                           {gotComment.includes(parseInt(d, 10)) &&
-                          !d.includes('p') ? (
-                            <Text
-                              style={{
-                                ...{
-                                  textAlign: 'center',
-                                  marginTop: -20,
-                                  fontSize: 20,
-                                  borderRadius: 100,
-                                  fontFamily: 'Poppins-Regular',
-                                },
-                                ...(parseInt(d, 10) === choosenDate.getDate() &&
-                                month === choosenDate.getMonth() + 1 &&
-                                !d.includes('p')
-                                  ? {
-                                      color: 'white',
-                                    }
-                                  : {}),
-                              }}>
-                              ·
-                            </Text>
-                          ) : null}
+                            !d.includes('p') && (
+                              <Text
+                                style={{
+                                  ...{
+                                    textAlign: 'center',
+                                    marginTop: -20,
+                                    fontSize: 20,
+                                    borderRadius: 100,
+                                    fontFamily: 'Poppins-Regular',
+                                  },
+                                  ...(parseInt(d, 10) ===
+                                    choosenDate.getDate() &&
+                                  month === choosenDate.getMonth() + 1 &&
+                                  !d.includes('p')
+                                    ? {
+                                        color: 'white',
+                                      }
+                                    : {}),
+                                }}>
+                                ·
+                              </Text>
+                            )}
                         </Pressable>
                       ))}
                     </View>
@@ -376,8 +377,9 @@ const CalendarView = props => {
         </View>
         {comments?.filter(
           e => new Date(e.date).getDate() === choosenDate.getDate(),
-        )[0] ? (
+        )[0] && (
           <Pressable
+            style={{marginBottom: 20}}
             onPress={() =>
               props.navigation.navigate('EachComment', {
                 choosenDate: choosenDate.toDateString(),
@@ -387,7 +389,7 @@ const CalendarView = props => {
               {t('common:viewCommentBtn')}
             </Text>
           </Pressable>
-        ) : null}
+        )}
         <View
           style={{
             flexDirection: 'row',
@@ -461,7 +463,7 @@ const CalendarView = props => {
             {t('common:noEvent')}
           </Text>
         )}
-        {editable ? (
+        {editable && (
           <View
             style={{
               paddingBottom: 40,
@@ -552,11 +554,11 @@ const CalendarView = props => {
               </Text>
             )}
           </View>
-        ) : null}
+        )}
       </ScrollView>
-      {editable ? (
+      {editable && (
         <>
-          {panelHideToggle ? (
+          {panelHideToggle && (
             <Pressable
               style={{
                 position: 'absolute',
@@ -572,7 +574,7 @@ const CalendarView = props => {
                 setPanelHideToggle(false);
               }}
             />
-          ) : null}
+          )}
           <SlidingUpPanel
             draggableRange={{top: hp(26), bottom: -200}}
             allowDragging={false}
@@ -674,7 +676,7 @@ const CalendarView = props => {
             </View>
           </SlidingUpPanel>
         </>
-      ) : null}
+      )}
     </>
   );
 };
@@ -857,7 +859,7 @@ const EachCommentView = props => {
             {formatURL(comment.content)}
           </Text>
         </View>
-        {comment.attachment ? (
+        {comment.attachment && (
           <Text
             style={{
               fontSize: wp(4.2),
@@ -867,47 +869,46 @@ const EachCommentView = props => {
             }}>
             {t('common:attachment')}
           </Text>
-        ) : null}
+        )}
         <View
           style={{
             marginBottom: 20,
           }}>
-          {comment.attachment
-            ? JSON.parse(comment.attachment).map((e, i) => (
-                <Pressable
-                  onPress={() =>
-                    Linking.openURL('http://' + ip + '/media/' + e.path)
-                  }
+          {comment.attachment &&
+            JSON.parse(comment.attachment).map((e, i) => (
+              <Pressable
+                onPress={() =>
+                  Linking.openURL('http://' + ip + '/media/' + e.path)
+                }
+                style={{
+                  paddingVertical: 8,
+                  paddingHorizontal: 15,
+                  borderWidth: 1,
+                  borderColor: 'rgba(0, 0, 0, 0.1)',
+                  borderRadius: 30,
+                  marginBottom: 5,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}>
+                <Text
+                  numberOfLines={1}
                   style={{
-                    paddingVertical: 8,
-                    paddingHorizontal: 15,
-                    borderWidth: 1,
-                    borderColor: 'rgba(0, 0, 0, 0.1)',
-                    borderRadius: 30,
-                    marginBottom: 5,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
+                    fontFamily: 'Poppins-Medium',
+                    color: '#333333',
+                    lineHeight: wp(5),
+                    maxWidth: '90%',
                   }}>
-                  <Text
-                    numberOfLines={1}
-                    style={{
-                      fontFamily: 'Poppins-Medium',
-                      color: '#333333',
-                      lineHeight: wp(5),
-                      maxWidth: '90%',
-                    }}>
-                    {e.name}
-                  </Text>
-                  <Pressable
-                    onPress={() => {
-                      downloadFile(e.path);
-                    }}>
-                    <MaterialIcon name="download" size={wp(4.6)} />
-                  </Pressable>
+                  {e.name}
+                </Text>
+                <Pressable
+                  onPress={() => {
+                    downloadFile(e.path);
+                  }}>
+                  <MaterialIcon name="download" size={wp(4.6)} />
                 </Pressable>
-              ))
-            : null}
+              </Pressable>
+            ))}
         </View>
         <View>
           <Text
@@ -927,41 +928,40 @@ const EachCommentView = props => {
             {replies.count || 0} {t('common:replyCount')}
           </Text>
           <View style={{marginBottom: wp(4)}}>
-            {replies.content
-              ? replies.content.map(e => (
-                  <View
-                    style={{flexDirection: 'row', marginBottom: 20}}
-                    key={e.id}>
-                    <Image
+            {replies.content &&
+              replies.content.map(e => (
+                <View
+                  style={{flexDirection: 'row', marginBottom: 20}}
+                  key={e.id}>
+                  <Image
+                    style={{
+                      width: wp(12),
+                      height: wp(12),
+                      borderRadius: 100,
+                      marginRight: 10,
+                      marginTop: 5,
+                    }}
+                    source={{
+                      uri: 'http://' + ip + e.avatar,
+                    }}
+                  />
+                  <View style={{width: '84%'}}>
+                    <Text
                       style={{
-                        width: wp(12),
-                        height: wp(12),
-                        borderRadius: 100,
-                        marginRight: 10,
-                        marginTop: 5,
-                      }}
-                      source={{
-                        uri: 'http://' + ip + e.avatar,
-                      }}
-                    />
-                    <View style={{width: '84%'}}>
-                      <Text
-                        style={{
-                          fontFamily: 'Poppins-Medium',
-                        }}>
-                        {e.author}
-                      </Text>
-                      <Text
-                        style={{
-                          fontFamily: 'Poppins-Regular',
-                          color: '#141414',
-                        }}>
-                        {e.content}
-                      </Text>
-                    </View>
+                        fontFamily: 'Poppins-Medium',
+                      }}>
+                      {e.author}
+                    </Text>
+                    <Text
+                      style={{
+                        fontFamily: 'Poppins-Regular',
+                        color: '#141414',
+                      }}>
+                      {e.content}
+                    </Text>
                   </View>
-                ))
-              : null}
+                </View>
+              ))}
           </View>
         </View>
         <View
