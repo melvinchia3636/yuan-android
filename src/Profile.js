@@ -61,7 +61,7 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
   const fetchUserData = async () => {
     const response = await axios({
       method: 'GET',
-      url: `http://${ip}/api/v1/user/fetch-user`,
+      url: `https://${ip}/api/v1/user/fetch-user`,
       headers: {
         Authorization: 'Token ' + token,
       },
@@ -92,7 +92,7 @@ const MainProfileView = ({token, setToken, navprops, ...props}) => {
             <Image
               style={styles.avatar}
               source={{
-                uri: 'http://' + ip + (data ? data.avatar : ''),
+                uri: 'https://' + ip + (data ? data.avatar : ''),
               }}
             />
           </View>

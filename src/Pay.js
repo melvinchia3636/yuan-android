@@ -84,7 +84,7 @@ const PayIndex = props => {
 
   useEffect(() => {
     axios({
-      url: `http://${ip}/api/v1/pay/fetch-reminder-contacts`,
+      url: `https://${ip}/api/v1/pay/fetch-reminder-contacts`,
       method: 'GET',
       headers: {
         Authorization: 'Token ' + props.token,
@@ -173,7 +173,7 @@ const TouchNGo = () => {
         <Image
           source={{
             uri:
-              'http://' +
+              'https://' +
               ip +
               '/static/980aadbd-a2d9-4661-b838-ede65a599ca5.jpeg',
           }}
@@ -197,7 +197,7 @@ const DuitNow = () => {
         <Image
           source={{
             uri:
-              'http://' +
+              'https://' +
               ip +
               '/static/8dc61863-5739-4864-aaf0-00a6ef8516d1.jpg',
           }}
@@ -218,7 +218,7 @@ const NotifyPayment = props => {
   const notifyUser = async id => {
     const lang = await AsyncStorage.getItem('user-language');
     axios({
-      url: `http://${ip}/api/v1/pay/create-reminder/${id}/${lang}`,
+      url: `https://${ip}/api/v1/pay/create-reminder/${id}/${lang}`,
       method: 'POST',
       headers: {
         Authorization: 'Token ' + props.token,
@@ -267,7 +267,7 @@ const NotifyPayment = props => {
                 marginRight: 10,
               }}
               source={{
-                uri: 'http://' + ip + e.avatar,
+                uri: 'https://' + ip + e.avatar,
               }}
             />
             <View>
