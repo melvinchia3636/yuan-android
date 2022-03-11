@@ -135,7 +135,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.yuan"
+        applicationId "com.yuan2"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

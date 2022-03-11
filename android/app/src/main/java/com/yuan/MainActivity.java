@@ -1,4 +1,4 @@
-package com.yuan;
+package com.yuan2;
 
 import com.facebook.react.ReactActivity;
 

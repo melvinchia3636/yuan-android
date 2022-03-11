@@ -141,7 +141,10 @@ const ChatIndex = props => {
                   marginRight: 10,
                 }}
                 source={{
-                  uri: 'https://' + ip + e.target[0].avatar,
+                  uri:
+                    'https://' +
+                    ip +
+                    (e.target[0]?.avatar || console.log(e) || '/media/avatar/default.jpg'),
                 }}
               />
             </View>
